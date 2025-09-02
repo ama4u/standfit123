@@ -27,7 +27,7 @@ export default function CartDrawer() {
     ).join('\n');
     
     const totalAmount = formatPrice(getTotalPrice());
-    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nPlease confirm availability and delivery details.`;
+    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nPlease confirm availability and delivery details.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number`;
     
     const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
