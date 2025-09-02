@@ -70,7 +70,7 @@ export default function About() {
 
       {/* Mission & Values */}
       <section className="py-20 bg-card" data-testid="mission-values-section">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-foreground mb-6" data-testid="mission-title">Our Mission & Values</h2>

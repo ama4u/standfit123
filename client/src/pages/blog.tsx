@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, ArrowRight, User, Clock } from "lucide-react";
+import { Calendar, ArrowRight, User, Clock, MessageCircle } from "lucide-react";
 
 export default function Blog() {
-  const { data: blogPosts, isLoading } = useQuery({
+  const { data: blogPosts, isLoading } = useQuery<any[]>({
     queryKey: ["/api/blog-posts"],
   });
 

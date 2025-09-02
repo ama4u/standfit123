@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Flame } from "lucide-react";
 
 export default function WeeklyDeals() {
-  const { data: deals, isLoading } = useQuery({
+  const { data: deals, isLoading } = useQuery<any[]>({
     queryKey: ["/api/weekly-deals"],
   });
 

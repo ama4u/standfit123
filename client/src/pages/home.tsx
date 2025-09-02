@@ -22,19 +22,19 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories, isLoading: categoriesLoading } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
 
-  const { data: featuredProducts, isLoading: productsLoading } = useQuery({
+  const { data: featuredProducts, isLoading: productsLoading } = useQuery<any[]>({
     queryKey: ["/api/products?featured=true"],
   });
 
-  const { data: blogPosts, isLoading: blogLoading } = useQuery({
+  const { data: blogPosts, isLoading: blogLoading } = useQuery<any[]>({
     queryKey: ["/api/blog-posts"],
   });
 
-  const { data: storeLocations, isLoading: locationsLoading } = useQuery({
+  const { data: storeLocations, isLoading: locationsLoading } = useQuery<any[]>({
     queryKey: ["/api/store-locations"],
   });
 
