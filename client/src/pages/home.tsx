@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import WeeklyDeals from "@/components/weekly-deals";
 import ProductCard from "@/components/product-card";
+import HeroCarousel from "@/components/hero-carousel";
 import { Link } from "wouter";
 import { 
   Store, 
@@ -97,18 +98,7 @@ export default function Home() {
             </div>
             
             <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-                alt="Nigerian food commodities and grains" 
-                className="rounded-xl shadow-2xl w-full h-auto"
-                data-testid="hero-image"
-              />
-              <div className="absolute -bottom-6 -left-6 bg-card p-4 rounded-lg shadow-lg border border-border">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary" data-testid="store-count">6</div>
-                  <div className="text-sm text-muted-foreground">Store Locations</div>
-                </div>
-              </div>
+              <HeroCarousel />
             </div>
           </div>
         </div>
