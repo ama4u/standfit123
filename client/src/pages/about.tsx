@@ -126,8 +126,8 @@ export default function About() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center p-8">
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-revenue">₦2.7B+</div>
-              <div className="text-muted-foreground">Annual Sales Revenue</div>
+              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-revenue">77+</div>
+              <div className="text-muted-foreground">Products Choice</div>
             </Card>
             
             <Card className="text-center p-8">

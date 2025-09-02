@@ -66,8 +66,8 @@ export default function Home() {
               <Card className="p-6">
                 <div className="grid sm:grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="text-3xl font-bold text-primary" data-testid="stat-sales">₦2.7B+</div>
-                    <div className="text-sm text-muted-foreground">Annual Sales</div>
+                    <div className="text-3xl font-bold text-primary" data-testid="stat-sales">77+</div>
+                    <div className="text-sm text-muted-foreground">Products Choice</div>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-secondary" data-testid="stat-years">7+</div>

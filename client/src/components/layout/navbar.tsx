@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Store, Menu, User, ShoppingCart, Phone } from "lucide-react";
+import { Menu, User, Phone } from "lucide-react";
+import logoUrl from "@assets/standfit logo_1756828194925.jpg";
+import CartDrawer from "@/components/cart/cart-drawer";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -23,8 +25,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <Store className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-primary">Standfit Premium</span>
+            <img src={logoUrl} alt="Standfit Premium Concept" className="h-12 w-auto" />
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -43,6 +44,7 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center space-x-4">
+            <CartDrawer />
             <Button 
               className="hidden sm:flex"
               data-testid="button-login"

@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ShoppingCart, Plus, Minus } from "lucide-react";
 import { openWhatsAppOrder } from "@/lib/whatsapp";
+import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
@@ -17,6 +18,8 @@ export default function ProductCard({
   discountPercentage = 0,
   salePrice 
 }: ProductCardProps) {
+  const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
+  
   const handleWhatsAppOrder = () => {
     openWhatsAppOrder({
       productName: product.name,
@@ -25,6 +28,20 @@ export default function ProductCard({
       unit: product.unit,
     });
   };
+  
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: salePrice || product.price,
+      unit: product.unit,
+      image_url: product.imageUrl || "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
+      is_locally_made: product.isLocallyMade || false,
+    });
+  };
+  
+  const itemQuantity = getItemQuantity(product.id);
+  const inCart = isInCart(product.id);
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow group" data-testid={`product-card-${product.id}`}>
@@ -68,14 +85,49 @@ export default function ProductCard({
             {product.unit}
           </span>
         </div>
-        <Button 
-          onClick={handleWhatsAppOrder}
-          className="w-full"
-          data-testid={`button-order-${product.id}`}
-        >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Order via WhatsApp
-        </Button>
+        <div className="space-y-2">
+          {inCart ? (
+            <div className="flex items-center justify-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => updateQuantity(product.id, itemQuantity - 1)}
+                data-testid={`decrease-${product.id}`}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="font-semibold px-4" data-testid={`cart-quantity-${product.id}`}>
+                {itemQuantity} in cart
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => updateQuantity(product.id, itemQuantity + 1)}
+                data-testid={`increase-${product.id}`}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              onClick={handleAddToCart}
+              className="w-full"
+              data-testid={`add-to-cart-${product.id}`}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
+            </Button>
+          )}
+          <Button 
+            onClick={handleWhatsAppOrder}
+            variant="outline"
+            className="w-full"
+            data-testid={`button-order-${product.id}`}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Order via WhatsApp
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
