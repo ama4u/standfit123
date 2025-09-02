@@ -10,6 +10,9 @@ import sugarProducts from "@assets/IMG-20231023-WA0013_1_1756830496569.jpg";
 import storeFront from "@assets/IMG-20231023-WA0022_1756830496569.jpg";
 import seasoningProducts from "@assets/IMG-20231023-WA0025_1756830496570.jpg";
 import colorfulProducts from "@assets/IMG-20231023-WA0036_1756830496572.jpg";
+import brandsShowcase from "@assets/brands_1756831510885.png";
+import communitySupport from "@assets/com support_1756831510887.jpg";
+import peakStorage from "@assets/peak large_1756831510888.jpg";
 
 const carouselImages = [
   {
@@ -53,6 +56,24 @@ const carouselImages = [
     alt: "Diverse packaged food products",
     title: "Diverse Product Range",
     description: "Wide selection of packaged foods from trusted Nigerian brands"
+  },
+  {
+    src: brandsShowcase,
+    alt: "Nigerian food brands we distribute",
+    title: "Premium Brand Partners",
+    description: "Authorized distributor for top Nigerian food brands including Dangote, Peak, Indomie, and more"
+  },
+  {
+    src: peakStorage,
+    alt: "Peak milk products in wholesale storage",
+    title: "Wholesale Distribution",
+    description: "Large-scale storage and distribution of Peak milk and dairy products"
+  },
+  {
+    src: communitySupport,
+    alt: "Community support and local business advocacy",
+    title: "Supporting Our Community",
+    description: "Shop Local. Eat Local. Spend Local. Enjoy Local - Building stronger communities together"
   }
 ];
 
