@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import WeeklyDeals from "@/components/weekly-deals";
 import ProductCard from "@/components/product-card";
 import HeroCarousel from "@/components/hero-carousel";
+import SocialImpactCarousel from "@/components/social-impact-carousel";
 import { Link } from "wouter";
 import { 
   Store, 
@@ -275,12 +276,7 @@ export default function Home() {
             </div>
             
             <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-                alt="Community food distribution program" 
-                className="rounded-xl shadow-lg w-full h-auto"
-                data-testid="social-impact-image"
-              />
+              <SocialImpactCarousel />
             </div>
           </div>
         </div>
