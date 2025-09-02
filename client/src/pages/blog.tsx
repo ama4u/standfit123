@@ -160,7 +160,7 @@ export default function Blog() {
                     className="flex-1 bg-green-500 hover:bg-green-600"
                     onClick={() => {
                       const message = "Hello Standfit Premium! I would like to subscribe to your WhatsApp updates for weekly deals and new product announcements.";
-                      const whatsappUrl = `https://wa.me/2348143082181?text=${encodeURIComponent(message)}`;
+                      const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
                       window.open(whatsappUrl, '_blank');
                     }}
                     data-testid="button-subscribe-whatsapp"

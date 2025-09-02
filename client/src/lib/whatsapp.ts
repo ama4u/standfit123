@@ -50,6 +50,6 @@ export function createWhatsAppOrderMessage(details: WhatsAppOrderDetails): strin
 
 export function openWhatsAppOrder(details: WhatsAppOrderDetails = {}): void {
   const message = createWhatsAppOrderMessage(details);
-  const whatsappUrl = `https://wa.me/2348143082181?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
   window.open(whatsappUrl, '_blank');
 }

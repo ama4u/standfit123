@@ -35,7 +35,7 @@ const storeLocations = [
     id: "dakwa",
     name: "Dakwa Outlet",
     address: "Dakwa Market, Abuja FCT",
-    phone: "08143082181",
+    phone: "08144672883",
     hours: "8:00 AM - 6:00 PM"
   },
   {
@@ -49,7 +49,7 @@ const storeLocations = [
     id: "wuse",
     name: "Wuse Modern Market",
     address: "Wuse Modern Market, Abuja FCT",
-    phone: "08143082181",
+    phone: "08144672883",
     hours: "8:00 AM - 6:00 PM"
   },
   {
@@ -63,14 +63,14 @@ const storeLocations = [
     id: "bwari",
     name: "Bwari Ultra-Modern Market",
     address: "Bwari Ultra-Modern Market, Abuja FCT",
-    phone: "08143082181",
+    phone: "08144672883",
     hours: "8:00 AM - 6:00 PM"
   },
   {
     id: "warehouse",
     name: "Main Warehouse",
     address: "Central Distribution Center, Abuja FCT",
-    phone: "08143082181",
+    phone: "08144672883",
     hours: "24/7 Operations"
   }
 ];
@@ -116,7 +116,7 @@ export default function Contact() {
 
   const handleWhatsAppOrder = () => {
     const message = "Hello Standfit Premium Concept! I would like to place an order. Please send me your product catalog and pricing.";
-    const whatsappUrl = `https://wa.me/2348143082181?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -156,7 +156,7 @@ export default function Contact() {
                     <div>
                       <p className="font-medium text-foreground" data-testid="contact-phone-label">Customer Service</p>
                       <div className="space-y-1">
-                        <p className="text-muted-foreground" data-testid="contact-phone-1">08143082181</p>
+                        <p className="text-muted-foreground" data-testid="contact-phone-1">08144672883</p>
                         <p className="text-muted-foreground" data-testid="contact-phone-2">08179919419</p>
                       </div>
                     </div>
@@ -196,7 +196,7 @@ export default function Contact() {
                     WhatsApp Order
                   </Button>
                   <Button 
-                    onClick={() => handleCall("08143082181")}
+                    onClick={() => handleCall("08144672883")}
                     className="flex-1"
                     data-testid="button-call-now"
                   >

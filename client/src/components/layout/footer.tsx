@@ -26,7 +26,7 @@ export default function Footer() {
                 <Twitter className="h-5 w-5" />
               </a>
               <a 
-                href="https://wa.me/2348143082181" 
+                href="https://wa.me/2348144672883" 
                 className="text-background/80 hover:text-background transition-colors"
                 data-testid="social-whatsapp"
               >
@@ -62,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-2 text-background/80">
               <li className="flex items-center space-x-2 text-sm sm:text-base">
                 <Phone className="h-4 w-4 flex-shrink-0" />
-                <span data-testid="footer-phone-1">08143082181</span>
+                <span data-testid="footer-phone-1">08144672883</span>
               </li>
               <li className="flex items-center space-x-2 text-sm sm:text-base">
                 <Phone className="h-4 w-4 flex-shrink-0" />

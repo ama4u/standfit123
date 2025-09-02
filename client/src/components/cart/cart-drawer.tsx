@@ -29,7 +29,7 @@ export default function CartDrawer() {
     const totalAmount = formatPrice(getTotalPrice());
     const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nPlease confirm availability and delivery details.`;
     
-    const whatsappUrl = `https://wa.me/2348143082181?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     setIsOpen(false);
   };

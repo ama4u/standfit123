@@ -194,7 +194,7 @@ export default function Services() {
                   Get a Quote
                 </Button>
               </Link>
-              <a href="https://wa.me/2348143082181?text=Hello%20Standfit%20Premium,%20I%20would%20like%20to%20discuss%20your%20services">
+              <a href="https://wa.me/2348144672883?text=Hello%20Standfit%20Premium,%20I%20would%20like%20to%20discuss%20your%20services">
                 <Button variant="secondary" size="lg" data-testid="button-whatsapp-services">
                   WhatsApp Us
                 </Button>
