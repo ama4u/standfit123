@@ -63,25 +63,25 @@ export default function ProductCard({
           </div>
         )}
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-foreground mb-2" data-testid={`product-name-${product.id}`}>
+      <CardContent className="p-3 sm:p-4">
+        <h3 className="font-semibold text-foreground mb-2 text-sm sm:text-base" data-testid={`product-name-${product.id}`}>
           {product.name}
         </h3>
-        <p className="text-muted-foreground text-sm mb-3" data-testid={`product-description-${product.id}`}>
+        <p className="text-muted-foreground text-xs sm:text-sm mb-3 line-clamp-2" data-testid={`product-description-${product.id}`}>
           {product.description}
         </p>
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-primary" data-testid={`product-price-${product.id}`}>
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <span className="text-base sm:text-lg font-bold text-primary" data-testid={`product-price-${product.id}`}>
               ₦{salePrice || product.price}
             </span>
             {isWeeklyDeal && (
-              <span className="text-muted-foreground line-through text-sm" data-testid={`product-original-price-${product.id}`}>
+              <span className="text-muted-foreground line-through text-xs sm:text-sm" data-testid={`product-original-price-${product.id}`}>
                 ₦{product.price}
               </span>
             )}
           </div>
-          <span className="text-sm text-muted-foreground" data-testid={`product-unit-${product.id}`}>
+          <span className="text-xs sm:text-sm text-muted-foreground" data-testid={`product-unit-${product.id}`}>
             {product.unit}
           </span>
         </div>
@@ -93,10 +93,11 @@ export default function ProductCard({
                 size="sm"
                 onClick={() => updateQuantity(product.id, itemQuantity - 1)}
                 data-testid={`decrease-${product.id}`}
+                className="h-8 w-8 p-0"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3 w-3" />
               </Button>
-              <span className="font-semibold px-4" data-testid={`cart-quantity-${product.id}`}>
+              <span className="font-semibold px-2 sm:px-4 text-xs sm:text-sm" data-testid={`cart-quantity-${product.id}`}>
                 {itemQuantity} in cart
               </span>
               <Button
@@ -104,27 +105,28 @@ export default function ProductCard({
                 size="sm"
                 onClick={() => updateQuantity(product.id, itemQuantity + 1)}
                 data-testid={`increase-${product.id}`}
+                className="h-8 w-8 p-0"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3 w-3" />
               </Button>
             </div>
           ) : (
             <Button 
               onClick={handleAddToCart}
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-10"
               data-testid={`add-to-cart-${product.id}`}
             >
-              <ShoppingCart className="h-4 w-4 mr-2" />
+              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Add to Cart
             </Button>
           )}
           <Button 
             onClick={handleWhatsAppOrder}
             variant="outline"
-            className="w-full"
+            className="w-full text-xs sm:text-sm h-8 sm:h-10"
             data-testid={`button-order-${product.id}`}
           >
-            <MessageCircle className="h-4 w-4 mr-2" />
+            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             Order via WhatsApp
           </Button>
         </div>

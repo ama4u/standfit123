@@ -6,11 +6,11 @@ export default function Footer() {
   return (
     <footer className="bg-foreground text-background py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img src={logoUrl} alt="Standfit Premium Concept" className="h-12 w-auto filter brightness-0 invert" />
-              <span className="text-2xl font-bold">Standfit Premium Concept</span>
+              <img src={logoUrl} alt="Standfit Premium Concept" className="h-10 sm:h-12 w-auto filter brightness-0 invert" />
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold">Standfit Premium Concept</span>
             </div>
             <p className="text-background/80 max-w-sm">
               Leading wholesale distributor and food retail store serving Abuja since 2010.
@@ -60,20 +60,20 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact Info</h4>
             <ul className="space-y-2 text-background/80">
-              <li className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
+              <li className="flex items-center space-x-2 text-sm sm:text-base">
+                <Phone className="h-4 w-4 flex-shrink-0" />
                 <span data-testid="footer-phone-1">08143082181</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
+              <li className="flex items-center space-x-2 text-sm sm:text-base">
+                <Phone className="h-4 w-4 flex-shrink-0" />
                 <span data-testid="footer-phone-2">08179919419</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <Globe className="h-4 w-4" />
-                <span data-testid="footer-website">www.standfitpremiumc.com</span>
+              <li className="flex items-center space-x-2 text-sm sm:text-base">
+                <Globe className="h-4 w-4 flex-shrink-0" />
+                <span data-testid="footer-website" className="break-all">www.standfitpremiumc.com</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
+              <li className="flex items-center space-x-2 text-sm sm:text-base">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
                 <span data-testid="footer-location">Abuja FCT, Nigeria</span>
               </li>
             </ul>

@@ -25,8 +25,9 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <img src={logoUrl} alt="Standfit Premium Concept" className="h-12 w-auto" />
-            <span className="text-2xl font-bold text-primary">Standfit Premium Concept</span>
+            <img src={logoUrl} alt="Standfit Premium Concept" className="h-10 sm:h-12 w-auto" />
+            <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary hidden xs:block sm:block">Standfit Premium Concept</span>
+            <span className="text-sm font-bold text-primary block xs:hidden sm:hidden">Standfit</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">

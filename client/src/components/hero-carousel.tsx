@@ -93,18 +93,18 @@ export default function HeroCarousel() {
               <img
                 src={image.src}
                 alt={image.alt}
-                className="w-full h-80 lg:h-96 object-cover"
+                className="w-full h-64 sm:h-80 lg:h-96 object-cover"
                 data-testid={`carousel-image-${index}`}
               />
               {/* Gradient overlay for better text visibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               
               {/* Image title and description overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="text-xl lg:text-2xl font-bold mb-2" data-testid={`carousel-title-${index}`}>
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-6 text-white">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 sm:mb-2" data-testid={`carousel-title-${index}`}>
                   {image.title}
                 </h3>
-                <p className="text-sm lg:text-base opacity-90" data-testid={`carousel-description-${index}`}>
+                <p className="text-xs sm:text-sm lg:text-base opacity-90" data-testid={`carousel-description-${index}`}>
                   {image.description}
                 </p>
               </div>
@@ -116,7 +116,7 @@ export default function HeroCarousel() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           onClick={prevSlide}
           data-testid="carousel-prev-button"
         >
@@ -126,7 +126,7 @@ export default function HeroCarousel() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           onClick={nextSlide}
           data-testid="carousel-next-button"
         >
@@ -151,10 +151,10 @@ export default function HeroCarousel() {
       </div>
 
       {/* Store count overlay card */}
-      <div className="absolute -bottom-6 -left-6 bg-card p-4 rounded-lg shadow-lg border border-border">
+      <div className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-card p-2 sm:p-4 rounded-lg shadow-lg border border-border">
         <div className="text-center">
-          <div className="text-2xl font-bold text-primary" data-testid="store-count">6</div>
-          <div className="text-sm text-muted-foreground">Store Locations</div>
+          <div className="text-xl sm:text-2xl font-bold text-primary" data-testid="store-count">6</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">Store Locations</div>
         </div>
       </div>
     </div>

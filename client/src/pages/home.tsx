@@ -49,48 +49,48 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 to-secondary/10 py-20" data-testid="hero-section">
+      <section className="relative bg-gradient-to-br from-primary/10 to-secondary/10 py-10 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <div className="space-y-6 sm:space-y-8">
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
                   Leading Wholesale Distributor & 
                   <span className="text-primary"> Food Retail Store</span> 
                   in Abuja
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-lg" data-testid="hero-description">
+                <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-lg" data-testid="hero-description">
                   Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
                 </p>
               </div>
               
-              <Card className="p-6">
-                <div className="grid sm:grid-cols-2 gap-4 text-center">
+              <Card className="p-4 sm:p-6">
+                <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="text-3xl font-bold text-primary" data-testid="stat-sales">77+</div>
-                    <div className="text-sm text-muted-foreground">Products Choice</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-primary" data-testid="stat-sales">77+</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Products Choice</div>
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-secondary" data-testid="stat-years">7+</div>
-                    <div className="text-sm text-muted-foreground">Years Serving Abuja</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-secondary" data-testid="stat-years">7+</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Years Serving Abuja</div>
                   </div>
                 </div>
               </Card>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link href="/products">
-                  <Button size="lg" data-testid="button-shop-now">
-                    <ShoppingCart className="h-5 w-5 mr-2" />
+                  <Button size="lg" className="w-full sm:w-auto" data-testid="button-shop-now">
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Shop Now
                   </Button>
                 </Link>
-                <Button variant="secondary" size="lg" data-testid="button-order-wholesale">
-                  <Package className="h-5 w-5 mr-2" />
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto" data-testid="button-order-wholesale">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Order Wholesale
                 </Button>
                 <Link href="/contact">
-                  <Button variant="outline" size="lg" data-testid="button-contact-us">
-                    <Phone className="h-5 w-5 mr-2" />
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto" data-testid="button-contact-us">
+                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Contact Us
                   </Button>
                 </Link>
@@ -105,14 +105,14 @@ export default function Home() {
       </section>
 
       {/* Quick Shop Categories */}
-      <section className="py-16 bg-card" data-testid="categories-section">
+      <section className="py-10 sm:py-16 bg-card" data-testid="categories-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Shop by Category</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Browse our extensive collection of Nigerian food commodities and provisions</p>
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Shop by Category</h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">Browse our extensive collection of Nigerian food commodities and provisions</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {categoriesLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-8">
@@ -126,14 +126,14 @@ export default function Home() {
                 const IconComponent = categoryIcons[category.slug as keyof typeof categoryIcons] || Box;
                 return (
                   <Link key={category.id} href={`/products?category=${category.id}`}>
-                    <Card className="group cursor-pointer p-8 text-center hover:shadow-lg transition-all duration-300 border border-border hover:border-primary/30" data-testid={`category-card-${category.slug}`}>
+                    <Card className="group cursor-pointer p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg transition-all duration-300 border border-border hover:border-primary/30" data-testid={`category-card-${category.slug}`}>
                       <div className="text-4xl text-primary mb-4">
                         <IconComponent className="h-10 w-10 mx-auto" />
                       </div>
-                      <h3 className="text-xl font-semibold text-foreground mb-2" data-testid={`category-name-${category.id}`}>
+                      <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2" data-testid={`category-name-${category.id}`}>
                         {category.name}
                       </h3>
-                      <p className="text-muted-foreground text-sm" data-testid={`category-description-${category.id}`}>
+                      <p className="text-muted-foreground text-xs sm:text-sm" data-testid={`category-description-${category.id}`}>
                         {category.description}
                       </p>
                       <div className="mt-4">
