@@ -10,6 +10,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <img src={logoUrl} alt="Standfit Premium Concept" className="h-12 w-auto filter brightness-0 invert" />
+              <span className="text-2xl font-bold">Standfit Premium Concept</span>
             </div>
             <p className="text-background/80 max-w-sm">
               Leading wholesale distributor and food retail store serving Abuja since 2010.
