@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import storeExterior from "@assets/IMG-20230615-WA0008_1756830496565.jpg";
 import coffeeProducts from "@assets/IMG-20231023-WA0009_1_1756830496567.jpg";
 import riceProducts from "@assets/IMG-20231023-WA0011_1756830496568.jpg";
-import sugarProducts from "@assets/IMG-20231023-WA0013_1_1756830496569.jpg";
+import sugarProducts from "@assets/sugar_1756848497888.jpg";
 import storeFront from "@assets/IMG-20231023-WA0022_1756830496569.jpg";
 import seasoningProducts from "@assets/IMG-20231023-WA0025_1756830496570.jpg";
 import colorfulProducts from "@assets/IMG-20231023-WA0036_1756830496572.jpg";
