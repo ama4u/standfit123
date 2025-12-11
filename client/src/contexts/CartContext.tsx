@@ -87,7 +87,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.price.replace(/,/g, ''));
+      const price = typeof item.price === 'string' 
+        ? parseFloat(item.price.replace(/,/g, ''))
+        : parseFloat(item.price);
       return total + (price * item.quantity);
     }, 0);
   };

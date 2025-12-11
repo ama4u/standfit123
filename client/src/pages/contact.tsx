@@ -115,7 +115,7 @@ export default function Contact() {
   };
 
   const handleWhatsAppOrder = () => {
-    const message = "Hello Standfit Premium Concept! I would like to place an order. Please send me your product catalog and pricing.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number";
+     const message = "Hello Standfit Premium Concept! I would like to place an order. Please send me your product catalog and pricing.\n\nPlease confirm availability, delivery time and delivery details.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number";
     const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };

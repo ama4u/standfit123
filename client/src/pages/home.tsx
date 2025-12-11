@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import WeeklyDeals from "@/components/weekly-deals";
-import ProductCard from "@/components/product-card";
 import HeroCarousel from "@/components/hero-carousel";
 import SocialImpactCarousel from "@/components/social-impact-carousel";
 import { Link } from "wouter";
@@ -28,10 +27,6 @@ export default function Home() {
     queryKey: ["/api/categories"],
   });
 
-  const { data: featuredProducts, isLoading: productsLoading } = useQuery<any[]>({
-    queryKey: ["/api/products?featured=true"],
-  });
-
   const { data: blogPosts, isLoading: blogLoading } = useQuery<any[]>({
     queryKey: ["/api/blog-posts"],
   });
@@ -52,7 +47,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/10 to-secondary/10 py-10 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-start">
             <div className="space-y-6 sm:space-y-8">
               <div className="space-y-4">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
@@ -80,43 +75,64 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link href="/products">
-                  <Button size="lg" className="w-full sm:w-auto" data-testid="button-shop-now">
+                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-shop-now">
                     <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Shop Now
                   </Button>
                 </Link>
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto" data-testid="button-order-wholesale">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  Order Wholesale
-                </Button>
                 <Link href="/contact">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto" data-testid="button-contact-us">
+                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap bg-green-600 hover:bg-green-700 text-white border-2 border-green-500" data-testid="button-contact-us">
                     <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                     Contact Us
                   </Button>
                 </Link>
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-order-wholesale">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Order Wholesale
+                </Button>
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative lg:mt-0">
               <HeroCarousel />
             </div>
           </div>
         </div>
       </section>
 
+      {/* News Flash Intro */}
+      <section className="py-8 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/news-flash" className="block rounded-xl overflow-hidden shadow-lg transform hover:scale-[1.01] transition-all cursor-pointer">
+            <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 p-8 sm:p-12 text-white">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold">News Flash</h2>
+                  <p className="mt-2 text-sm sm:text-base text-white/90 max-w-xl">Catch up with our latest updates, promos, and short videos. Click to view the full News Flash page.</p>
+                </div>
+                <div className="text-right">
+                  <div className="inline-block bg-white/10 backdrop-blur-md rounded-lg px-4 py-2 border border-white/20">
+                    <span className="font-semibold">View Now →</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Quick Shop Categories */}
       <section className="py-10 sm:py-16 bg-card" data-testid="categories-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Shop by Category</h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">Browse our extensive collection of Nigerian food commodities and provisions</p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 max-w-full">
             {categoriesLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="p-8">
+              Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="p-6 sm:p-8">
                   <Skeleton className="h-8 w-8 mx-auto mb-4" />
                   <Skeleton className="h-6 w-3/4 mx-auto mb-2" />
                   <Skeleton className="h-4 w-full mx-auto" />
@@ -127,14 +143,14 @@ export default function Home() {
                 const IconComponent = categoryIcons[category.slug as keyof typeof categoryIcons] || Box;
                 return (
                   <Link key={category.id} href={`/products?category=${category.id}`}>
-                    <Card className="group cursor-pointer p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg transition-all duration-300 border border-border hover:border-primary/30" data-testid={`category-card-${category.slug}`}>
+                    <Card className="group cursor-pointer p-4 sm:p-6 lg:p-8 text-center hover:shadow-lg transition-all duration-300 border border-border hover:border-primary/30 h-full" data-testid={`category-card-${category.slug}`}>
                       <div className="text-4xl text-primary mb-4">
                         <IconComponent className="h-10 w-10 mx-auto" />
                       </div>
                       <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2" data-testid={`category-name-${category.id}`}>
                         {category.name}
                       </h3>
-                      <p className="text-muted-foreground text-xs sm:text-sm" data-testid={`category-description-${category.id}`}>
+                      <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2" data-testid={`category-description-${category.id}`}>
                         {category.description}
                       </p>
                       <div className="mt-4">
@@ -151,45 +167,6 @@ export default function Home() {
 
       {/* Weekly Deals */}
       <WeeklyDeals />
-
-      {/* Featured Products */}
-      <section className="py-20 bg-muted" data-testid="featured-products-section">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-6">Featured Products</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Discover our premium selection of Nigerian food commodities available for wholesale and retail</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {productsLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="w-full h-48" />
-                  <CardContent className="p-4 space-y-4">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-10 w-full" />
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              featuredProducts?.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            )}
-          </div>
-          
-          <div className="text-center mt-12">
-            <Link href="/products">
-              <Button variant="secondary" size="lg" data-testid="button-view-all-products">
-                View All Products
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Why Choose Us */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-secondary/5" data-testid="why-choose-us-section">

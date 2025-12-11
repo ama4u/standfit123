@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import About from "@/pages/about";
@@ -12,6 +13,13 @@ import Services from "@/pages/services";
 import Team from "@/pages/team";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
+import NewsFlash from "@/pages/news-flash";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
+import ResetPassword from "@/pages/reset-password";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
+import UserDashboard from "@/pages/user-dashboard";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import WhatsAppFloat from "@/components/whatsapp-float";
@@ -29,6 +37,13 @@ function Router() {
           <Route path="/team" component={Team} />
           <Route path="/contact" component={Contact} />
           <Route path="/blog" component={Blog} />
+          <Route path="/news-flash" component={NewsFlash} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/reset-password" component={ResetPassword} />
+          <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/dashboard" component={UserDashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -41,12 +56,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </CartProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

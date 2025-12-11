@@ -11,11 +11,22 @@ export interface WhatsAppOrderDetails {
 
 export function createWhatsAppOrderMessage(details: WhatsAppOrderDetails): string {
   let message = "Hello Standfit Premium Concept! I would like to place an order.\n\n";
+  // Lazy import to avoid circular deps in some bundlers
+  const fmt = (value?: string) => {
+    try {
+      if (value === undefined) return undefined;
+      const num = typeof value === 'string' ? Number(value) : (value as unknown as number);
+      if (!Number.isFinite(num)) return value;
+      return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(num);
+    } catch {
+      return value;
+    }
+  };
   
   if (details.productName) {
     message += `Product: ${details.productName}\n`;
     if (details.productPrice) {
-      message += `Price: ${details.productPrice}\n`;
+      message += `Price: ${fmt(details.productPrice)}\n`;
     }
     if (details.unit) {
       message += `Unit: ${details.unit}\n`;
@@ -43,7 +54,7 @@ export function createWhatsAppOrderMessage(details: WhatsAppOrderDetails): strin
     message += "\n";
   }
   
-  message += "Please confirm availability and total cost including delivery.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number\n\nThank you!";
+   message += "Please confirm availability, delivery time and total cost including delivery.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number\n\nThank you!";
   
   return message;
 }

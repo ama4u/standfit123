@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <rect width="100%" height="100%" fill="#f0fff4" />
+  <g fill="#047857" font-family="Arial, sans-serif">
+    <text x="50%" y="45%" font-size="48" font-weight="700" text-anchor="middle">Community Retailers</text>
+    <text x="50%" y="60%" font-size="28" text-anchor="middle" fill="#065f46">Local retailers and market vendors</text>
+  </g>
+  <circle cx="300" cy="520" r="60" fill="#bbf7d0" />
+  <circle cx="520" cy="520" r="60" fill="#86efac" />
+  <rect x="700" y="480" width="140" height="80" rx="10" fill="#bbf7d0" />
+</svg>

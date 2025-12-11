@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Carousel Images - Standfit Premium</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .upload-section h3 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .upload-section p {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .preview {
+            margin-top: 15px;
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            color: #555;
+            line-height: 1.6;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Upload New Carousel Images</h1>
+        
+        <div class="upload-section">
+            <h3>1. Happy Vendor Image</h3>
+            <p>The image showing the friendly female vendor in striped shirt with wholesale goods</p>
+            <input type="file" id="vendor-image" accept="image/*" onchange="previewImage(this, 'vendor-preview')">
+            <div id="vendor-preview"></div>
+        </div>
+
+        <div class="upload-section">
+            <h3>2. Store Interior Image</h3>
+            <p>The interior view with green covering and organized product displays</p>
+            <input type="file" id="interior-image" accept="image/*" onchange="previewImage(this, 'interior-preview')">
+            <div id="interior-preview"></div>
+        </div>
+
+        <div class="upload-section">
+            <h3>3. Warehouse Storage Image</h3>
+            <p>The professional warehouse with ceiling tiles and stacked inventory</p>
+            <input type="file" id="warehouse-image" accept="image/*" onchange="previewImage(this, 'warehouse-preview')">
+            <div id="warehouse-preview"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Select each image using the file inputs above</li>
+                <li>Right-click on each preview image and "Save As"</li>
+                <li>Save them in the <code>attached_assets</code> folder with these exact names:
+                    <ul>
+                        <li><strong>new-store-happy-vendor.jpg</strong></li>
+                        <li><strong>new-store-interior-view.jpg</strong></li>
+                        <li><strong>new-warehouse-storage.jpg</strong></li>
+                    </ul>
+                </li>
+                <li>Refresh your website to see the new images in the carousel</li>
+            </ol>
+        </div>
+
+        <div class="note">
+            <strong>Note:</strong> The carousel has already been updated to use these new images. Once you save them with the correct filenames, they will automatically appear in the hero section carousel.
+        </div>
+    </div>
+
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="preview" alt="Preview">`;
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

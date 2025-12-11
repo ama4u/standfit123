@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, ShoppingCart, Plus, Minus } from "lucide-react";
 import { openWhatsAppOrder } from "@/lib/whatsapp";
+import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import type { Product } from "@shared/schema";
 
@@ -23,7 +24,7 @@ export default function ProductCard({
   const handleWhatsAppOrder = () => {
     openWhatsAppOrder({
       productName: product.name,
-      productPrice: salePrice || product.price,
+      productPrice: String(salePrice || product.price),
       productDescription: product.description || '',
       unit: product.unit,
     });
@@ -33,7 +34,7 @@ export default function ProductCard({
     addToCart({
       id: product.id,
       name: product.name,
-      price: salePrice || product.price,
+      price: String(salePrice || product.price),
       unit: product.unit,
       image_url: product.imageUrl || "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250",
       is_locally_made: product.isLocallyMade || false,
@@ -73,11 +74,11 @@ export default function ProductCard({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-1 sm:space-x-2">
             <span className="text-base sm:text-lg font-bold text-primary" data-testid={`product-price-${product.id}`}>
-              ₦{salePrice || product.price}
+              {formatPrice(salePrice || product.price)}
             </span>
             {isWeeklyDeal && (
               <span className="text-muted-foreground line-through text-xs sm:text-sm" data-testid={`product-original-price-${product.id}`}>
-                ₦{product.price}
+                {formatPrice(product.price)}
               </span>
             )}
           </div>

@@ -2,19 +2,55 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Import all store images
-import storeExterior from "@assets/IMG-20230615-WA0008_1756830496565.jpg";
-import coffeeProducts from "@assets/IMG-20231023-WA0009_1_1756830496567.jpg";
-import riceProducts from "@assets/IMG-20231023-WA0011_1756830496568.jpg";
-import sugarProducts from "@assets/IMG-20231023-WA0013_1_1756830496569.jpg";
-import storeFront from "@assets/IMG-20231023-WA0022_1756830496569.jpg";
-import seasoningProducts from "@assets/IMG-20231023-WA0025_1756830496570.jpg";
-import colorfulProducts from "@assets/IMG-20231023-WA0036_1756830496572.jpg";
-import brandsShowcase from "@assets/brands_1756831510885.png";
-import communitySupport from "@assets/com support_1756831510887.jpg";
-import peakStorage from "@assets/peak large_1756831510888.jpg";
+// Use direct URLs to attached_assets served statically by the server
+const storeExterior = "/attached_assets/IMG-20230615-WA0008_1756830496565.jpg";
+const coffeeProducts = "/attached_assets/IMG-20231023-WA0009_1_1756830496567.jpg";
+const riceProducts = "/attached_assets/IMG-20231023-WA0011_1756830496568.jpg";
+const sugarProducts = "/attached_assets/IMG-20231023-WA0013_1_1756830496569.jpg";
+const storeFront = "/attached_assets/IMG-20231023-WA0022_1756830496569.jpg";
+const seasoningProducts = "/attached_assets/IMG-20231023-WA0025_1756830496570.jpg";
+const colorfulProducts = "/attached_assets/IMG-20231023-WA0036_1756830496572.jpg";
+const brandsShowcase = "/attached_assets/brands_1756831510885.png";
+const communitySupport = "/attached_assets/com support_1756831510887.jpg";
+const peakStorage = "/attached_assets/peak large_1756831510888.jpg";
 
 const carouselImages = [
+  {
+    src: '/attached_assets/new-store-happy-vendor.jpeg',
+    alt: "Happy female vendor in striped shirt standing proudly in front of wholesale goods including TopCafe and Golden Penny products",
+    title: "Our Friendly Team",
+    description: "Dedicated staff providing excellent service with TopCafe, Golden Penny and quality wholesale products"
+  },
+  {
+    src: '/attached_assets/new-store-interior-view.jpeg',
+    alt: "Interior view of organized wholesale store with green covering and TopCafe product displays",
+    title: "Organized Store Layout",
+    description: "Well-organized store featuring TopCafe displays and systematic wholesale product arrangement"
+  },
+  {
+    src: '/attached_assets/new-warehouse-storage.jpeg',
+    alt: "Professional warehouse storage with ceiling tiles showing stacked rice bags and wholesale inventory",
+    title: "Professional Warehouse Storage",
+    description: "Large-scale warehouse with organized rice bags, TopCafe products and comprehensive wholesale inventory"
+  },
+  {
+    src: '/attached_assets/market1.svg',
+    alt: "Wholesale store entrance with stacked goods and vendor",
+    title: "Wholesale Market Front",
+    description: "Bulk packaged goods and everyday essentials for retailers and families"
+  },
+  {
+    src: '/attached_assets/market2.svg',
+    alt: "Stacks of rice, sugar and boxed goods in storage",
+    title: "Bulk Storage",
+    description: "Organized bulk storage of rice, sugar and packaged groceries"
+  },
+  {
+    src: '/attached_assets/market3.svg',
+    alt: "Vendor posing in front of stacked wholesale goods",
+    title: "Community Retailers",
+    description: "Local retailers and market vendors serving customers daily"
+  },
   {
     src: storeExterior,
     alt: "Standfit Premium Concept store exterior showcasing product brands",
@@ -169,14 +205,6 @@ export default function HeroCarousel() {
             data-testid={`carousel-dot-${index}`}
           />
         ))}
-      </div>
-
-      {/* Store count overlay card */}
-      <div className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-card p-2 sm:p-4 rounded-lg shadow-lg border border-border">
-        <div className="text-center">
-          <div className="text-xl sm:text-2xl font-bold text-primary" data-testid="store-count">6</div>
-          <div className="text-xs sm:text-sm text-muted-foreground">Store Locations</div>
-        </div>
       </div>
     </div>
   );

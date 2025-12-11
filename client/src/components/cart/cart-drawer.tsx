@@ -1,15 +1,127 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ShoppingCart, Plus, Minus, Trash2, MessageCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ShoppingCart, Plus, Minus, Trash2, MessageCircle, Package } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CartDrawer() {
   const { items, updateQuantity, removeFromCart, getTotalItems, getTotalPrice, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<'delivery' | 'pickup'>('delivery');
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
+  const [notes, setNotes] = useState('');
+
+  // Fetch user profile to pre-fill address
+  const { data: userProfile } = useQuery({
+    queryKey: ['/api/user/profile'],
+    queryFn: async () => {
+      if (!isAuthenticated) return null;
+      const res = await fetch('/api/user/profile', { credentials: 'include' });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Pre-fill address when checkout dialog opens
+  useEffect(() => {
+    if (
+      showCheckout &&
+      fulfillmentMethod === 'delivery' &&
+      userProfile?.contactAddress &&
+      !shippingAddress
+    ) {
+      setShippingAddress(userProfile.contactAddress);
+    }
+  }, [showCheckout, fulfillmentMethod, userProfile, shippingAddress]);
+
+  const placeOrderMutation = useMutation({
+    mutationFn: async (orderData: any) => {
+      const response = await fetch('/api/user/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to place order');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Your order has been received and is being processed.",
+      });
+      clearCart();
+      setShowCheckout(false);
+      setIsOpen(false);
+      setShippingAddress('');
+      setNotes('');
+      queryClient.invalidateQueries({ queryKey: ['/api/user/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/reports'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Order Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please login to place an order",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowCheckout(true);
+  };
+
+  const handlePlaceOrder = () => {
+    if (fulfillmentMethod === 'delivery' && !shippingAddress.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter a shipping address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const orderData = {
+      items: items.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+      fulfillmentMethod,
+      shippingAddress: fulfillmentMethod === 'delivery' ? shippingAddress.trim() : null,
+      paymentMethod,
+      notes: notes.trim() || null,
+    };
+
+    placeOrderMutation.mutate(orderData);
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -23,26 +135,85 @@ export default function CartDrawer() {
     if (items.length === 0) return;
     
     const orderDetails = items.map(item => 
-      `${item.name} (${item.unit}) - Qty: ${item.quantity} - ₦${item.price} each`
+      `${item.name} (${item.unit}) - Qty: ${item.quantity} - ${formatPrice(parseFloat(item.price))} each`
     ).join('\n');
     
     const totalAmount = formatPrice(getTotalPrice());
-    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nPlease confirm availability and delivery details.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number`;
+    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nFulfillment Method: Delivery or Pickup (please confirm)\n\nPlease confirm availability, delivery time and delivery details.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number`;
     
     const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     setIsOpen(false);
   };
 
+  const handleWhatsAppCheckout = () => {
+    if (items.length === 0) return;
+    if (fulfillmentMethod === 'delivery' && !shippingAddress.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter a shipping address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const orderDetails = items.map(item => 
+      `${item.name} (${item.unit}) - Qty: ${item.quantity} - ${formatPrice(parseFloat(item.price))} each`
+    ).join('\n');
+
+    const totalAmount = formatPrice(getTotalPrice());
+    const paymentLabel = paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 'Cash on Delivery';
+    const methodLabel = fulfillmentMethod === 'delivery' ? 'Delivery' : 'Pickup';
+
+    const lines: string[] = [];
+    lines.push("Hello! I'd like to place an order:");
+    lines.push("");
+    lines.push(orderDetails);
+    lines.push("");
+    lines.push(`Total: ${totalAmount}`);
+    lines.push(`Fulfillment Method: ${methodLabel}`);
+    if (fulfillmentMethod === 'delivery') {
+      lines.push(`Delivery Address: ${shippingAddress.trim()}`);
+    }
+    lines.push(`Payment Method: ${paymentLabel}`);
+    if (notes.trim()) {
+      lines.push(`Notes: ${notes.trim()}`);
+    }
+    lines.push("");
+    lines.push("Please confirm availability, delivery time and delivery details.");
+    lines.push("");
+    lines.push("*Payment Details:*");
+    lines.push("Please provide your account details for payment processing:");
+    lines.push("- Account Name");
+    lines.push("- Bank Name");
+    lines.push("- Account Number");
+
+    const message = lines.join('\n');
+    const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    // Clear cart after sending WhatsApp message
+    clearCart();
+    setShowCheckout(false);
+    setIsOpen(false);
+    setShippingAddress('');
+    setNotes('');
+    
+    toast({
+      title: "Order Sent via WhatsApp",
+      description: "Your cart has been cleared. Please wait for confirmation on WhatsApp.",
+    });
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" data-testid="cart-button">
+        <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20" data-testid="cart-button">
           <ShoppingCart className="h-5 w-5" />
           {getTotalItems() > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 border-2 border-white shadow-lg animate-pulse"
               data-testid="cart-badge"
             >
               {getTotalItems()}
@@ -51,9 +222,9 @@ export default function CartDrawer() {
         </Button>
       </SheetTrigger>
       
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg border-l-4 border-blue-600 bg-gradient-to-b from-white to-blue-50">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2 text-blue-600">
             <ShoppingCart className="h-5 w-5" />
             Your Cart ({getTotalItems()} items)
           </SheetTitle>
@@ -79,7 +250,7 @@ export default function CartDrawer() {
                     <div className="flex-1 space-y-1">
                       <h4 className="font-semibold text-sm">{item.name}</h4>
                       <p className="text-sm text-muted-foreground">{item.unit}</p>
-                      <p className="font-semibold text-primary">₦{item.price}</p>
+                      <p className="font-semibold text-primary">{formatPrice(parseFloat(item.price))}</p>
                       {item.is_locally_made && (
                         <Badge variant="secondary" className="text-xs">Nigerian Made</Badge>
                       )}
@@ -135,8 +306,19 @@ export default function CartDrawer() {
               
               <div className="space-y-2">
                 <Button 
+                  onClick={handleCheckout}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg border-2 border-blue-300"
+                  size="lg"
+                  data-testid="checkout-button"
+                >
+                  <Package className="h-5 w-5 mr-2" />
+                  Checkout
+                </Button>
+
+                <Button 
                   onClick={handleWhatsAppOrder}
-                  className="w-full"
+                  variant="outline"
+                  className="w-full border-2 border-green-300 text-green-600 hover:bg-green-50"
                   size="lg"
                   data-testid="order-whatsapp-button"
                 >
@@ -145,9 +327,9 @@ export default function CartDrawer() {
                 </Button>
                 
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   onClick={clearCart}
-                  className="w-full"
+                  className="w-full text-red-600 hover:bg-red-50"
                   data-testid="clear-cart-button"
                 >
                   Clear Cart
@@ -157,6 +339,107 @@ export default function CartDrawer() {
           </div>
         )}
       </SheetContent>
+
+      {/* Checkout Dialog */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="sm:max-w-[500px] border-4 border-blue-600">
+          <DialogHeader>
+            <DialogTitle className="text-blue-600">Checkout</DialogTitle>
+            <DialogDescription>
+              Complete your order details to proceed
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Fulfillment Method</Label>
+              <RadioGroup value={fulfillmentMethod} onValueChange={(v) => setFulfillmentMethod(v as 'delivery' | 'pickup')}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="delivery" id="delivery" />
+                  <Label htmlFor="delivery" className="font-normal cursor-pointer">Delivery</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="pickup" id="pickup" />
+                  <Label htmlFor="pickup" className="font-normal cursor-pointer">Pickup</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">{fulfillmentMethod === 'delivery' ? 'Shipping Address *' : 'Pickup (no address required)'}</Label>
+              {fulfillmentMethod === 'delivery' ? (
+                <Textarea
+                  id="address"
+                  placeholder="Enter your full delivery address"
+                  value={shippingAddress}
+                  onChange={(e) => setShippingAddress(e.target.value)}
+                  rows={3}
+                />
+              ) : (
+                <div className="text-sm text-muted-foreground border rounded-md p-3">
+                  You selected pickup. We will share pickup time and location after order confirmation.
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Payment Method</Label>
+              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="bank_transfer" id="bank_transfer" />
+                  <Label htmlFor="bank_transfer" className="font-normal cursor-pointer">
+                    Bank Transfer
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cash_on_delivery" id="cash_on_delivery" />
+                  <Label htmlFor="cash_on_delivery" className="font-normal cursor-pointer">
+                    Cash on Delivery
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Order Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                placeholder="Any special instructions or requests"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex justify-between items-center text-lg font-semibold">
+                <span>Total Amount:</span>
+                <span className="text-blue-600">{formatPrice(getTotalPrice())}</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCheckout(false)} className="border-2 border-gray-300">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handlePlaceOrder} 
+              disabled={placeOrderMutation.isPending}
+              variant="outline"
+              className="border-2 border-blue-300"
+            >
+              {placeOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
+            </Button>
+            <Button 
+              onClick={handleWhatsAppCheckout}
+              className="bg-green-600 hover:bg-green-700 text-white border-2 border-green-500"
+            >
+              Send via WhatsApp
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 }

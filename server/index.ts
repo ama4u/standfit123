@@ -1,10 +1,26 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "standfit-wholesale-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    },
+  })
+);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -39,6 +55,18 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Serve uploaded files statically (both in dev and prod)
+  app.use(
+    "/uploads",
+    express.static(path.resolve(process.cwd(), "uploads"))
+  );
+
+  // Serve the attached_assets folder so client can request images directly
+  app.use(
+    "/attached_assets",
+    express.static(path.resolve(process.cwd(), "attached_assets"))
+  );
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -56,16 +84,22 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  // Force port 5000 ONLY - no alternatives
+  const port = 5000;
+
+  server.listen(port, () => {
+    log(`🚀 Server running on port ${port}`);
+    log(`📱 Local: http://localhost:${port}`);
+    if (process.env.NODE_ENV === "production") {
+      log(`🌐 Production: https://standfit-app.herokuapp.com`);
+    }
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      log(`❌ Port ${port} is already in use!`);
+      log(`💡 Please stop any other processes using port ${port} and try again.`);
+      process.exit(1);
+    } else {
+      throw err;
+    }
   });
 })();
