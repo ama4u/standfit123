@@ -129,6 +129,7 @@ export default function AdminNewsFlash() {
                       if (fileInput) fileInput.value = '';
                     } catch (error) {
                       console.error('Upload failed:', error);
+                      alert('Upload failed. Please try again or check your internet connection.');
                     }
                   }} 
                   className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"

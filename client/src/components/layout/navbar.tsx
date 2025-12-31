@@ -26,13 +26,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, admin, logout, isAuthenticated, isAdmin } = useAuth();
 
-  // Debug logging to check auth state
-  console.log('Navbar Auth State:', { 
-    user: !!user, 
-    admin: !!admin, 
-    isAuthenticated, 
-    isAdmin,
-    userEmail: user?.email,
+  // Auth state is managed by AuthContext
     adminEmail: admin?.email 
   });
 

@@ -3,11 +3,26 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 
 // Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name',
-  api_key: process.env.CLOUDINARY_API_KEY || 'your-api-key',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'your-api-secret',
-});
+const cloudinaryConfig = {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+};
+
+// Check if all required Cloudinary credentials are present
+const hasCloudinaryCredentials = cloudinaryConfig.cloud_name && 
+  cloudinaryConfig.api_key && 
+  cloudinaryConfig.api_secret &&
+  cloudinaryConfig.cloud_name !== 'your-cloud-name' &&
+  cloudinaryConfig.api_key !== 'your-api-key' &&
+  cloudinaryConfig.api_secret !== 'your-api-secret';
+
+if (hasCloudinaryCredentials) {
+  cloudinary.config(cloudinaryConfig);
+  console.log('✅ Cloudinary configured successfully');
+} else {
+  console.warn('⚠️  Cloudinary credentials not found. Upload will use local storage fallback.');
+}
 
 // Create Cloudinary storage for images
 const imageStorage = new CloudinaryStorage({

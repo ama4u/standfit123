@@ -54,27 +54,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   });
 
-  // Admin: upload a single image file to Cloudinary, returns public URL
-  app.post("/api/admin/upload", requireAdmin as any, uploadImage.single("image"), (req, res) => {
-    const file = (req as any).file as Express.Multer.File | undefined;
-    if (!file) return res.status(400).json({ message: "No file uploaded" });
-    return res.json({ 
-      filename: file.filename, 
-      url: (file as any).path,
-      publicId: (file as any).filename 
-    });
+  // Local media upload (fallback when Cloudinary is not configured)
+  const uploadMediaLocal = multer({
+    storage: storageMulter,
+    fileFilter: (_req, file, cb) => {
+      if (/^image\//i.test(file.mimetype)) return cb(null, true);
+      if (/^video\/mp4$/i.test(file.mimetype)) return cb(null, true);
+      cb(new Error("Only images and mp4 videos are allowed"));
+    },
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   });
 
-  // Admin: upload image or video to Cloudinary for News Flash (field name: file)
-  app.post("/api/admin/upload-media", requireAdmin as any, uploadMedia.single("file"), (req, res) => {
+
+
+  // Check if Cloudinary is configured
+  const hasCloudinaryCredentials = process.env.CLOUDINARY_CLOUD_NAME && 
+    process.env.CLOUDINARY_API_KEY && 
+    process.env.CLOUDINARY_API_SECRET &&
+    process.env.CLOUDINARY_CLOUD_NAME !== 'your-cloud-name';
+
+  // Admin: upload a single image file (Cloudinary or local fallback)
+  const imageUploadHandler = hasCloudinaryCredentials ? uploadImage : upload;
+  app.post("/api/admin/upload", requireAdmin as any, imageUploadHandler.single("image"), (req, res) => {
     const file = (req as any).file as Express.Multer.File | undefined;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
-    return res.json({ 
-      filename: file.filename, 
-      url: (file as any).path,
-      publicId: (file as any).filename,
-      resourceType: file.mimetype.startsWith('video/') ? 'video' : 'image'
-    });
+    
+    if (hasCloudinaryCredentials) {
+      return res.json({ 
+        filename: file.filename, 
+        url: (file as any).path, // Cloudinary URL
+        publicId: (file as any).public_id 
+      });
+    } else {
+      return res.json({ 
+        filename: file.filename, 
+        url: `/uploads/${file.filename}` // Local URL
+      });
+    }
+  });
+
+  // Admin: upload image or video (Cloudinary or local fallback)
+  const mediaUploadHandler = hasCloudinaryCredentials ? uploadMedia : uploadMediaLocal;
+  app.post("/api/admin/upload-media", requireAdmin as any, mediaUploadHandler.single("file"), (req, res) => {
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) return res.status(400).json({ message: "No file uploaded" });
+    
+    if (hasCloudinaryCredentials) {
+      return res.json({ 
+        filename: file.filename, 
+        url: (file as any).path, // Cloudinary URL
+        publicId: (file as any).public_id,
+        resourceType: (file as any).resource_type 
+      });
+    } else {
+      return res.json({ 
+        filename: file.filename, 
+        url: `/uploads/${file.filename}`, // Local URL
+        resourceType: file.mimetype.startsWith('video/') ? 'video' : 'image'
+      });
+    }
   });
 
   // Ensure news_flash_items table exists (simple fallback for development)
