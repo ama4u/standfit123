@@ -84,14 +84,14 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Force port 5000 ONLY - no alternatives
-  const port = 5000;
+  // Use Heroku's PORT environment variable or fallback to 5000 for local development
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 
   server.listen(port, () => {
     log(`🚀 Server running on port ${port}`);
     log(`📱 Local: http://localhost:${port}`);
     if (process.env.NODE_ENV === "production") {
-      log(`🌐 Production: https://standfit-app.herokuapp.com`);
+      log(`🌐 Production: https://standfit-e816d09b795a.herokuapp.com`);
     }
   }).on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
