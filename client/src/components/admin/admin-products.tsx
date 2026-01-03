@@ -84,17 +84,31 @@ export default function AdminProducts() {
   const uploadImageMutation = useMutation({
     mutationFn: async (file: File) => {
       const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload-media", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Image upload failed");
+      fd.append("image", file); // Use "image" field name for the simpler upload route
+      const res = await fetch("/api/admin/upload", { 
+        method: "POST", 
+        body: fd,
+        credentials: 'include' // Include cookies for authentication
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Upload failed:", res.status, errorText);
+        throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+      }
       return res.json() as Promise<{ url: string; filename: string; publicId: string }>;
     },
     onSuccess: (data) => {
       setProductForm(prev => ({ ...prev, imageUrl: data.url }));
       toast({ title: "Success", description: "Image uploaded successfully" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to upload image", variant: "destructive" });
+    onError: (error) => {
+      console.error("Upload error:", error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to upload image. Please make sure you're logged in as admin.", 
+        variant: "destructive" 
+      });
     },
   });
 
@@ -105,6 +119,7 @@ export default function AdminProducts() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error("Failed to create product");
       return res.json();
@@ -126,6 +141,7 @@ export default function AdminProducts() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error("Failed to update product");
       return res.json();
@@ -143,7 +159,10 @@ export default function AdminProducts() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/products/${id}`, { 
+        method: "DELETE",
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to delete product");
       return res.json();
     },
@@ -163,6 +182,7 @@ export default function AdminProducts() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: 'include'
       });
       if (!res.ok) throw new Error("Failed to create category");
       return res.json();
@@ -180,7 +200,10 @@ export default function AdminProducts() {
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/categories/${id}`, { 
+        method: "DELETE",
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to delete category");
       return res.json();
     },
