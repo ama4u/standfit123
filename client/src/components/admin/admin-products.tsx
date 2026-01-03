@@ -4,13 +4,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/utils";
-import { X } from "lucide-react";
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Edit, 
+  Trash, 
+  Upload, 
+  Image as ImageIcon, 
+  Package, 
+  DollarSign,
+  Tag,
+  Star,
+  Eye,
+  Download,
+  MoreHorizontal,
+  X,
+  Check,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
 import { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function AdminProducts() {
+  const { toast } = useToast();
   const qc = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  // Form states
+  const [productForm, setProductForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    unit: "",
+    categoryId: "",
+    featured: false,
+    inStock: true,
+    imageFile: null as File | null,
+    imageUrl: ""
+  });
+
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    description: ""
+  });
+
   const { data: products, isLoading: loadingProducts } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -29,114 +80,47 @@ export default function AdminProducts() {
     },
   });
 
-  // Local state for forms
-  const [catName, setCatName] = useState("");
-  const [catDescription, setCatDescription] = useState("");
-  const [prodName, setProdName] = useState("");
-  const [prodDescription, setProdDescription] = useState("");
-  const [prodPrice, setProdPrice] = useState("");
-  const [prodUnit, setProdUnit] = useState("");
-  const [prodCategoryId, setProdCategoryId] = useState<string | undefined>(undefined);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [inStock, setInStock] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
-
-  // Helpers
-  function resetProductForm() {
-    setProdName("");
-    setProdDescription("");
-    setProdPrice("");
-    setProdUnit("");
-    setProdCategoryId(undefined);
-    setIsFeatured(false);
-    setInStock(true);
-    setImageFile(null);
-    setImageUrl(null);
-  }
-
-  // Mutations
-  const createCategory = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: catName, description: catDescription }),
-      });
-      if (!res.ok) throw new Error("Failed to create category");
-      return res.json();
-    },
-    onSuccess: () => {
-      setCatName("");
-      setCatDescription("");
-      qc.invalidateQueries({ queryKey: ["categories"] });
-    },
-  });
-
-  const deleteCategory = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete category");
-      return res.json();
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["categories"] });
-    },
-  });
-
-  const uploadImage = useMutation({
+  // Image upload mutation
+  const uploadImageMutation = useMutation({
     mutationFn: async (file: File) => {
       const fd = new FormData();
-      fd.append("image", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload-media", { method: "POST", body: fd });
       if (!res.ok) throw new Error("Image upload failed");
       return res.json() as Promise<{ url: string; filename: string; publicId: string }>;
     },
     onSuccess: (data) => {
-      setImageUrl(data.url);
+      setProductForm(prev => ({ ...prev, imageUrl: data.url }));
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload image", variant: "destructive" });
     },
   });
 
-  const createProduct = useMutation({
-    mutationFn: async () => {
-      const payload: any = {
-        name: prodName,
-        description: prodDescription,
-        price: Number(prodPrice || 0),
-        unit: prodUnit,
-        categoryId: prodCategoryId || null,
-        featured: isFeatured,
-        inStock: inStock,
-        imageUrl: imageUrl,
-      };
+  // Product mutations
+  const createProductMutation = useMutation({
+    mutationFn: async (data: any) => {
       const res = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Failed to create product");
       return res.json();
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products"] });
       resetProductForm();
-      qc.invalidateQueries({ queryKey: ["products"] });
+      setShowAddProduct(false);
+      toast({ title: "Success", description: "Product created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create product", variant: "destructive" });
     },
   });
 
-  const deleteProduct = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete product");
-      return res.json();
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["products"] });
-    },
-  });
-
-  const updateProduct = useMutation({
+  const updateProductMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "PUT",
@@ -147,236 +131,703 @@ export default function AdminProducts() {
       return res.json();
     },
     onSuccess: () => {
-      setEditingProductId(null);
-      setEditImageUrl(null);
       qc.invalidateQueries({ queryKey: ["products"] });
+      setEditingProduct(null);
+      resetProductForm();
+      toast({ title: "Success", description: "Product updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update product", variant: "destructive" });
     },
   });
 
-  const uploadEditImage = useMutation({
-    mutationFn: async ({ file, productId }: { file: File; productId: string }) => {
-      const fd = new FormData();
-      fd.append("image", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Image upload failed");
-      const data = await res.json() as { url: string; filename: string };
-      // Auto-update product with new image
-      await updateProduct.mutateAsync({ id: productId, data: { imageUrl: data.url } });
-      return data;
+  const deleteProductMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete product");
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products"] });
+      toast({ title: "Success", description: "Product deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
     },
   });
 
-  if (loadingProducts) return <div>Loading...</div>;
+  // Category mutations
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create category");
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["categories"] });
+      setCategoryForm({ name: "", description: "" });
+      setShowAddCategory(false);
+      toast({ title: "Success", description: "Category created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create category", variant: "destructive" });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete category");
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["categories"] });
+      toast({ title: "Success", description: "Category deleted successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete category", variant: "destructive" });
+    },
+  });
+
+  const resetProductForm = () => {
+    setProductForm({
+      name: "",
+      description: "",
+      price: "",
+      unit: "",
+      categoryId: "",
+      featured: false,
+      inStock: true,
+      imageFile: null,
+      imageUrl: ""
+    });
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image size must be less than 10MB", variant: "destructive" });
+      return;
+    }
+    
+    setProductForm(prev => ({ ...prev, imageFile: file }));
+    uploadImageMutation.mutate(file);
+  };
+
+  const handleProductSubmit = () => {
+    if (!productForm.name.trim() || !productForm.price) {
+      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
+      return;
+    }
+
+    const data = {
+      name: productForm.name,
+      description: productForm.description,
+      price: Number(productForm.price),
+      unit: productForm.unit,
+      categoryId: productForm.categoryId || null,
+      featured: productForm.featured,
+      inStock: productForm.inStock,
+      imageUrl: productForm.imageUrl,
+    };
+
+    if (editingProduct) {
+      updateProductMutation.mutate({ id: editingProduct.id, data });
+    } else {
+      createProductMutation.mutate(data);
+    }
+  };
+
+  const startEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setProductForm({
+      name: product.name,
+      description: product.description || "",
+      price: product.price.toString(),
+      unit: product.unit || "",
+      categoryId: product.categoryId || "",
+      featured: product.featured || false,
+      inStock: product.inStock !== false,
+      imageFile: null,
+      imageUrl: product.imageUrl || ""
+    });
+    setShowAddProduct(true);
+  };
+
+  const filteredProducts = products?.filter((product: any) => {
+    const matchesSearch = 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = 
+      categoryFilter === "all" || 
+      product.categoryId === categoryFilter ||
+      (categoryFilter === "uncategorized" && !product.categoryId);
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loadingProducts) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const productStats = {
+    total: products?.length || 0,
+    featured: products?.filter((p: any) => p.featured).length || 0,
+    inStock: products?.filter((p: any) => p.inStock !== false).length || 0,
+    outOfStock: products?.filter((p: any) => p.inStock === false).length || 0
+  };
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-4 rounded-lg shadow-lg border-2 border-blue-300">
-        <h2 className="text-3xl font-bold text-white drop-shadow-lg">Products Management</h2>
-        <p className="text-blue-50 text-sm mt-1">Manage categories, products, and images</p>
-      </div>
-
-      {/* Category management */}
-      <Card className="border-2 border-blue-200 shadow-xl hover:shadow-2xl transition-shadow rounded-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-4">
-          <CardTitle className="text-white text-xl font-semibold drop-shadow-md">Create Category</CardTitle>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+          <p className="text-gray-600">Manage your product catalog and inventory</p>
         </div>
-        <CardContent className="space-y-4 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 backdrop-blur-sm pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="cat-name" className="font-semibold text-gray-700">Name</Label>
-              <Input id="cat-name" value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="e.g., Beverages" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
-            </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="cat-desc" className="font-semibold text-gray-700">Description</Label>
-              <Input id="cat-desc" value={catDescription} onChange={(e) => setCatDescription(e.target.value)} placeholder="Short description" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
-            </div>
-          </div>
-          <Button onClick={() => createCategory.mutate()} disabled={!catName}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all border-2 border-blue-300 font-semibold">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowAddCategory(true)}
+          >
+            <Tag className="w-4 h-4 mr-2" />
             Add Category
           </Button>
-
-          <div className="mt-6 p-4 bg-white/50 rounded-lg border border-blue-100">
-            <h3 className="font-semibold mb-3 text-blue-900">Existing Categories</h3>
-            <div className="flex flex-wrap gap-2">
-              {categories?.map((c: any) => (
-                <span key={c.id} className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 rounded-full text-sm font-medium text-blue-900 shadow-sm border border-blue-200 hover:shadow-md transition-shadow">
-                  {c.name}
-                  <button aria-label={`delete-${c.id}`} onClick={() => deleteCategory.mutate(c.id)} className="text-red-500 hover:text-red-700 transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Product creation */}
-      <Card className="border-2 border-blue-200 shadow-xl hover:shadow-2xl transition-shadow rounded-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-6 py-4">
-          <CardTitle className="text-white text-xl font-semibold drop-shadow-md">Create Product</CardTitle>
+          <Button 
+            size="sm" 
+            onClick={() => setShowAddProduct(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Product
+          </Button>
         </div>
-        <CardContent className="space-y-4 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 backdrop-blur-sm pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="prod-name" className="font-semibold text-gray-700">Name</Label>
-              <Input id="prod-name" value={prodName} onChange={(e) => setProdName(e.target.value)} placeholder="e.g., Coca-Cola 50cl" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Products</p>
+                <p className="text-2xl font-bold text-gray-900">{productStats.total}</p>
+              </div>
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Package className="w-5 h-5 text-blue-600" />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="prod-price" className="font-semibold text-gray-700">Price (₦)</Label>
-              <Input id="prod-price" type="number" value={prodPrice} onChange={(e) => setProdPrice(e.target.value)} placeholder="0" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Featured</p>
+                <p className="text-2xl font-bold text-yellow-600">{productStats.featured}</p>
+              </div>
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <Star className="w-5 h-5 text-yellow-600" />
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <Label htmlFor="prod-desc" className="font-semibold text-gray-700">Description</Label>
-              <Textarea id="prod-desc" value={prodDescription} onChange={(e) => setProdDescription(e.target.value)} placeholder="Short description" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">In Stock</p>
+                <p className="text-2xl font-bold text-green-600">{productStats.inStock}</p>
+              </div>
+              <div className="p-2 bg-green-50 rounded-lg">
+                <Check className="w-5 h-5 text-green-600" />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="prod-unit" className="font-semibold text-gray-700">Unit</Label>
-              <Input id="prod-unit" value={prodUnit} onChange={(e) => setProdUnit(e.target.value)} placeholder="e.g., per pack" className="border-blue-200 focus:border-blue-500 focus:ring-blue-500" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p className="text-2xl font-bold text-red-600">{productStats.outOfStock}</p>
+              </div>
+              <div className="p-2 bg-red-50 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+              </div>
             </div>
-            <div>
-              <Label className="font-semibold text-gray-700">Category</Label>
-              <Select value={prodCategoryId} onValueChange={setProdCategoryId as any}>
-                <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-500">
-                  <SelectValue placeholder="Select a category" />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search products by name or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories?.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="uncategorized">Uncategorized</SelectItem>
+                  {categories?.map((category: any) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-2">
-              <Label className="font-semibold text-gray-700">Product Image</Label>
-              <div className="flex items-center gap-3 p-3 border-2 border-dashed border-blue-300 rounded-lg bg-white/50 hover:bg-blue-50/50 transition-colors">
-                <Input type="file" accept="image/*" onChange={(e) => {
-                  const f = e.target.files?.[0] || null;
-                  setImageFile(f);
-                  if (f) uploadImage.mutate(f);
-                }} className="border-0 bg-transparent" />
-                {imageUrl && (
-                  <img src={imageUrl} alt="preview" className="h-20 w-20 object-cover rounded-lg border-2 border-blue-300 shadow-md" />
-                )}
-              </div>
-            </div>
           </div>
-          <Button onClick={() => createProduct.mutate()} disabled={!prodName || !prodPrice || !prodUnit}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all border-2 border-blue-300 font-semibold">
-            Add Product
-          </Button>
         </CardContent>
       </Card>
 
-      {/* Product list */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200 shadow-inner">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-bold text-blue-900 drop-shadow-sm">Products</h3>
-          <span className="text-sm text-blue-700 font-medium bg-blue-100 px-3 py-1 rounded-full border border-blue-300">
-            {products?.length || 0} items
-          </span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products?.map((product: any) => (
-            <Card key={product.id} className="border-2 border-blue-200 hover:border-blue-400 transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1 duration-300 rounded-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 px-4 py-3">
-                <CardTitle className="text-white text-lg flex items-center justify-between drop-shadow-md">
-                  <span className="truncate font-semibold">{product.name}</span>
-                  <Button variant="destructive" size="sm" onClick={() => deleteProduct.mutate(product.id)} 
-                    className="bg-red-600 hover:bg-red-700 text-white border-0 shadow-md">
-                    Delete
-                  </Button>
-                </CardTitle>
-              </div>
-              <CardContent className="bg-gradient-to-br from-white to-blue-50/30 p-4">
-                <div className="relative group mb-3">
-                  {product.imageUrl && (
-                    <img src={product.imageUrl} alt={product.name} className="h-40 w-full object-cover rounded-lg border-2 border-blue-200 shadow-md" />
-                  )}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                    <label htmlFor={`file-${product.id}`} className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg font-medium">
-                      Change Image
-                    </label>
-                    <input
-                      id={`file-${product.id}`}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) uploadEditImage.mutate({ file: f, productId: product.id });
-                      }}
+      {/* Products Table */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="font-semibold">Product</TableHead>
+                  <TableHead className="font-semibold">Category</TableHead>
+                  <TableHead className="font-semibold">Price</TableHead>
+                  <TableHead className="font-semibold">Status</TableHead>
+                  <TableHead className="font-semibold">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts?.map((product: any) => (
+                  <TableRow key={product.id} className="hover:bg-gray-50">
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="w-12 h-12 rounded-lg">
+                          <AvatarImage src={product.imageUrl} className="object-cover" />
+                          <AvatarFallback className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-lg">
+                            <Package className="w-6 h-6" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500 line-clamp-1">
+                            {product.description || "No description"}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {product.featured && (
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
+                                <Star className="w-3 h-3 mr-1" />
+                                Featured
+                              </Badge>
+                            )}
+                            {product.unit && (
+                              <Badge variant="outline" className="text-xs">
+                                {product.unit}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {product.category ? (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          {product.category.name}
+                        </Badge>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Uncategorized</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <DollarSign className="w-4 h-4 text-green-600 mr-1" />
+                        <span className="font-semibold text-green-600">
+                          {formatPrice(product.price)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={product.inStock !== false ? "default" : "destructive"}
+                        className={product.inStock !== false ? "bg-green-100 text-green-800" : ""}
+                      >
+                        {product.inStock !== false ? "In Stock" : "Out of Stock"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEditProduct(product)}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
+                                  deleteProductMutation.mutate(product.id);
+                                }
+                              }}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash className="w-4 h-4 mr-2" />
+                              Delete Product
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {filteredProducts?.length === 0 && (
+            <div className="text-center py-12">
+              <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-500">
+                {searchTerm || categoryFilter !== "all" 
+                  ? "Try adjusting your search or filter criteria"
+                  : "Get started by adding your first product"
+                }
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add/Edit Product Dialog */}
+      <Dialog open={showAddProduct} onOpenChange={(open) => {
+        setShowAddProduct(open);
+        if (!open) {
+          setEditingProduct(null);
+          resetProductForm();
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingProduct ? "Update product information" : "Create a new product for your catalog"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Image Upload */}
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">Product Image</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                {productForm.imageUrl ? (
+                  <div className="relative">
+                    <img 
+                      src={productForm.imageUrl} 
+                      alt="Product preview" 
+                      className="w-32 h-32 object-cover rounded-lg mx-auto mb-4"
                     />
-                  </div>
-                </div>
-                {editingProductId === product.id ? (
-                  <div className="space-y-2">
-                    <Input
-                      defaultValue={product.name}
-                      placeholder="Product name"
-                      onBlur={(e) => {
-                        if (e.target.value !== product.name) {
-                          updateProduct.mutate({ id: product.id, data: { name: e.target.value } });
-                        }
-                      }}
-                      className="border-blue-300 focus:border-blue-500"
-                    />
-                    <Textarea
-                      defaultValue={product.description}
-                      placeholder="Description"
-                      onBlur={(e) => {
-                        if (e.target.value !== product.description) {
-                          updateProduct.mutate({ id: product.id, data: { description: e.target.value } });
-                        }
-                      }}
-                      className="border-blue-300 focus:border-blue-500"
-                    />
-                    <div className="flex gap-2">
-                      <Input
-                        type="number"
-                        defaultValue={product.price}
-                        placeholder="Price"
-                        onBlur={(e) => {
-                          const newPrice = Number(e.target.value);
-                          if (newPrice !== product.price) {
-                            updateProduct.mutate({ id: product.id, data: { price: newPrice } });
-                          }
-                        }}
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                      <Input
-                        defaultValue={product.unit}
-                        placeholder="Unit"
-                        onBlur={(e) => {
-                          if (e.target.value !== product.unit) {
-                            updateProduct.mutate({ id: product.id, data: { unit: e.target.value } });
-                          }
-                        }}
-                        className="border-blue-300 focus:border-blue-500"
-                      />
-                    </div>
-                    <Button size="sm" onClick={() => setEditingProductId(null)} className="w-full bg-green-600 hover:bg-green-700">
-                      Done Editing
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setProductForm(prev => ({ ...prev, imageUrl: "", imageFile: null }))}
+                      className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2"
+                    >
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                 ) : (
-                  <>
-                    <p className="text-sm text-gray-700 mb-3 line-clamp-2">{product.description}</p>
-                    <div className="flex items-baseline justify-between mb-2">
-                      <p className="text-xl font-bold text-blue-900">{formatPrice(product.price)}</p>
-                      <p className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">{product.unit}</p>
-                    </div>
-                    <Button size="sm" variant="outline" onClick={() => setEditingProductId(product.id)} className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
-                      Edit Product
-                    </Button>
-                  </>
+                  <div>
+                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">Upload product image</p>
+                    <p className="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+                
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(file);
+                  }}
+                  className="hidden"
+                  id="product-image"
+                />
+                <Label htmlFor="product-image" className="cursor-pointer">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="mt-4"
+                    disabled={uploadImageMutation.isPending}
+                  >
+                    {uploadImageMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {uploadImageMutation.isPending ? "Uploading..." : "Choose Image"}
+                  </Button>
+                </Label>
+              </div>
+            </div>
+
+            {/* Product Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="product-name">Product Name *</Label>
+                <Input
+                  id="product-name"
+                  value={productForm.name}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter product name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="product-unit">Unit</Label>
+                <Input
+                  id="product-unit"
+                  value={productForm.unit}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, unit: e.target.value }))}
+                  placeholder="e.g., kg, pieces, liters"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="product-description">Description</Label>
+              <Textarea
+                id="product-description"
+                value={productForm.description}
+                onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter product description"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="product-price">Price *</Label>
+                <Input
+                  id="product-price"
+                  type="number"
+                  step="0.01"
+                  value={productForm.price}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, price: e.target.value }))}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="product-category">Category</Label>
+                <Select 
+                  value={productForm.categoryId} 
+                  onValueChange={(value) => setProductForm(prev => ({ ...prev, categoryId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Category</SelectItem>
+                    {categories?.map((category: any) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Product Options */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <Label className="text-sm font-medium">Featured Product</Label>
+                  <p className="text-sm text-gray-500">Show this product prominently on the homepage</p>
+                </div>
+                <Switch
+                  checked={productForm.featured}
+                  onCheckedChange={(checked) => setProductForm(prev => ({ ...prev, featured: checked }))}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                  <Label className="text-sm font-medium">In Stock</Label>
+                  <p className="text-sm text-gray-500">Product is available for purchase</p>
+                </div>
+                <Switch
+                  checked={productForm.inStock}
+                  onCheckedChange={(checked) => setProductForm(prev => ({ ...prev, inStock: checked }))}
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAddProduct(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleProductSubmit}
+                disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                {(createProductMutation.isPending || updateProductMutation.isPending) ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4 mr-2" />
+                )}
+                {editingProduct ? "Update Product" : "Create Product"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Category Dialog */}
+      <Dialog open={showAddCategory} onOpenChange={setShowAddCategory}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Add New Category
+            </DialogTitle>
+            <DialogDescription>
+              Create a new product category to organize your products
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="category-name">Category Name *</Label>
+              <Input
+                id="category-name"
+                value={categoryForm.name}
+                onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter category name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="category-description">Description</Label>
+              <Textarea
+                id="category-description"
+                value={categoryForm.description}
+                onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter category description"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowAddCategory(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (!categoryForm.name.trim()) {
+                    toast({ title: "Error", description: "Category name is required", variant: "destructive" });
+                    return;
+                  }
+                  createCategoryMutation.mutate(categoryForm);
+                }}
+                disabled={createCategoryMutation.isPending}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                {createCategoryMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4 mr-2" />
+                )}
+                Create Category
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Categories Management */}
+      {categories && categories.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Categories ({categories.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categories.map((category: any) => (
+                <div key={category.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{category.name}</h4>
+                      {category.description && (
+                        <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-2">
+                        {products?.filter((p: any) => p.categoryId === category.id).length || 0} products
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to delete "${category.name}"?`)) {
+                          deleteCategoryMutation.mutate(category.id);
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
