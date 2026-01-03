@@ -27,19 +27,23 @@ export default function Navbar() {
   const { user, admin, logout, isAuthenticated, isAdmin } = useAuth();
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-lg border-b-4 border-blue-700 sticky top-0 z-50 backdrop-blur-sm">
+    <nav className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 shadow-xl border-b border-slate-700 sticky top-0 z-50 backdrop-blur-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-12 items-center h-20 gap-4">
           {/* Logo Section - Takes 3 columns */}
           <div className="col-span-6 md:col-span-3">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="bg-white p-2 rounded-lg shadow-md group-hover:shadow-xl transition-all duration-300 border-2 border-blue-200">
-                <img src={logoUrl} alt="Standfit Premium Concept" className="h-10 sm:h-12 w-auto" />
+              <div className="bg-white p-2 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 border-2 border-white/20">
+                <img src={logoUrl} alt="Standfit" className="h-10 sm:h-12 w-auto" />
               </div>
-              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white hidden xs:block sm:block drop-shadow-lg">
-                Standfit Premium Concept
-              </span>
-              <span className="text-sm font-bold text-white block xs:hidden sm:hidden drop-shadow-lg">Standfit</span>
+              <div className="hidden sm:block">
+                <span className="text-xl lg:text-2xl font-bold text-white drop-shadow-lg tracking-wide">
+                  Standfit
+                </span>
+                <div className="text-xs text-blue-100 font-medium tracking-wider uppercase">
+                  Premium Quality
+                </div>
+              </div>
             </Link>
           </div>
           
@@ -50,8 +54,8 @@ export default function Navbar() {
                 href="/"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   location === "/" 
-                    ? 'bg-white text-blue-600 shadow-lg transform scale-105' 
-                    : 'text-white hover:bg-white/20 hover:backdrop-blur-md border border-transparent hover:border-white/30'
+                    ? 'bg-white text-slate-900 shadow-lg transform scale-105' 
+                    : 'text-white hover:bg-white/10 hover:backdrop-blur-md border border-transparent hover:border-white/20'
                 }`}
                 data-testid="nav-link-home"
               >
@@ -62,8 +66,8 @@ export default function Navbar() {
                 href="/products"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   location === "/products" 
-                    ? 'bg-white text-blue-600 shadow-lg transform scale-105' 
-                    : 'text-white hover:bg-white/20 hover:backdrop-blur-md border border-transparent hover:border-white/30'
+                    ? 'bg-white text-slate-900 shadow-lg transform scale-105' 
+                    : 'text-white hover:bg-white/10 hover:backdrop-blur-md border border-transparent hover:border-white/20'
                 }`}
                 data-testid="nav-link-products"
               >
@@ -74,8 +78,8 @@ export default function Navbar() {
                 href="/news-flash"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   location === "/news-flash" 
-                    ? 'bg-white text-blue-600 shadow-lg transform scale-105' 
-                    : 'text-white hover:bg-white/20 hover:backdrop-blur-md border border-transparent hover:border-white/30'
+                    ? 'bg-white text-slate-900 shadow-lg transform scale-105' 
+                    : 'text-white hover:bg-white/10 hover:backdrop-blur-md border border-transparent hover:border-white/20'
                 }`}
                 data-testid="nav-link-news-flash"
               >
@@ -86,8 +90,8 @@ export default function Navbar() {
                 href="/contact"
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   location === "/contact" 
-                    ? 'bg-white text-blue-600 shadow-lg transform scale-105' 
-                    : 'text-white hover:bg-white/20 hover:backdrop-blur-md border border-transparent hover:border-white/30'
+                    ? 'bg-white text-slate-900 shadow-lg transform scale-105' 
+                    : 'text-white hover:bg-white/10 hover:backdrop-blur-md border border-transparent hover:border-white/20'
                 }`}
                 data-testid="nav-link-contact"
               >
@@ -106,14 +110,14 @@ export default function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
-                    className="hidden sm:flex bg-white text-blue-600 hover:bg-blue-50 shadow-lg border-2 border-blue-200 font-semibold" 
+                    className="hidden sm:flex bg-white text-slate-900 hover:bg-slate-100 shadow-lg border border-slate-200 font-semibold" 
                     data-testid="button-user-menu"
                   >
                     <User className="h-4 w-4 mr-2" />
                     {isAdmin ? admin?.email?.split('@')[0] : user?.firstName || user?.email?.split('@')[0]}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="border-2 border-blue-200">
+                <DropdownMenuContent align="end" className="border border-slate-200 shadow-xl">
                   <DropdownMenuItem asChild>
                     <Link href={isAdmin ? "/admin" : "/dashboard"} className="cursor-pointer">
                       <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -129,10 +133,10 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="hidden sm:flex items-center space-x-3">
-                <Button asChild variant="outline" className="bg-white text-blue-600 hover:bg-blue-50 border-2 border-blue-200 shadow-md" data-testid="button-login">
+                <Button asChild variant="outline" className="bg-white text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-md" data-testid="button-login">
                   <Link href="/login">Login</Link>
                 </Button>
-                <Button asChild className="bg-green-600 hover:bg-green-700 text-white shadow-md border-2 border-green-300" data-testid="button-register">
+                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-md border border-blue-500" data-testid="button-register">
                   <Link href="/register">Register</Link>
                 </Button>
               </div>
@@ -149,7 +153,7 @@ export default function Navbar() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-gradient-to-b from-blue-50 to-indigo-50 border-l-4 border-blue-600">
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-gradient-to-b from-slate-50 to-slate-100 border-l border-slate-200">
                 <nav className="flex flex-col space-y-6 mt-8">
                   {navigation.map((item) => (
                     <Link 
@@ -157,8 +161,8 @@ export default function Navbar() {
                       href={item.href}
                       className={`text-lg px-6 py-4 rounded-xl transition-all duration-300 ${
                         location === item.href 
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg transform scale-105' 
-                          : 'text-gray-700 hover:bg-blue-100 border border-transparent hover:border-blue-300 hover:shadow-md'
+                          ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white font-semibold shadow-lg transform scale-105' 
+                          : 'text-slate-700 hover:bg-slate-200 border border-transparent hover:border-slate-300 hover:shadow-md'
                       }`}
                       onClick={() => setIsOpen(false)}
                       data-testid={`mobile-nav-link-${item.name.toLowerCase().replace(' ', '-')}`}
@@ -170,7 +174,7 @@ export default function Navbar() {
                   {isAuthenticated ? (
                     <>
                       <Button 
-                        className="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg border-2 border-blue-300 py-4" 
+                        className="mt-6 w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 shadow-lg border border-slate-600 py-4" 
                         asChild 
                         data-testid="mobile-button-dashboard"
                       >
@@ -181,7 +185,7 @@ export default function Navbar() {
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="w-full border-2 border-red-300 text-red-600 hover:bg-red-50 py-4" 
+                        className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-4" 
                         onClick={() => { logout(); setIsOpen(false); }}
                         data-testid="mobile-button-logout"
                       >
@@ -191,10 +195,10 @@ export default function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Button asChild className="mt-6 w-full bg-white text-blue-600 hover:bg-blue-50 border-2 border-blue-300 shadow-lg py-4" data-testid="mobile-button-login">
+                      <Button asChild className="mt-6 w-full bg-white text-slate-900 hover:bg-slate-100 border border-slate-300 shadow-lg py-4" data-testid="mobile-button-login">
                         <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>
                       </Button>
-                      <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg border-2 border-green-300 py-4" data-testid="mobile-button-register">
+                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg border border-blue-500 py-4" data-testid="mobile-button-register">
                         <Link href="/register" onClick={() => setIsOpen(false)}>Register</Link>
                       </Button>
                     </>
