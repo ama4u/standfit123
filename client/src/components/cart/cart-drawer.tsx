@@ -131,7 +131,7 @@ export default function CartDrawer() {
     ).join('\n');
     
     const totalAmount = formatPrice(getTotalPrice());
-    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nFulfillment Method: Delivery or Pickup (please confirm)\n\nPlease confirm availability, delivery time and delivery details.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number`;
+    const message = `Hello! I'd like to place an order:\n\n${orderDetails}\n\nTotal: ${totalAmount}\n\nFulfillment Method: Delivery or Pickup (please confirm)`;
     
     const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -171,14 +171,6 @@ export default function CartDrawer() {
     if (notes.trim()) {
       lines.push(`Notes: ${notes.trim()}`);
     }
-    lines.push("");
-    lines.push("Please confirm availability, delivery time and delivery details.");
-    lines.push("");
-    lines.push("*Payment Details:*");
-    lines.push("Please provide your account details for payment processing:");
-    lines.push("- Account Name");
-    lines.push("- Bank Name");
-    lines.push("- Account Number");
 
     const message = lines.join('\n');
     const whatsappUrl = `https://wa.me/2348144672883?text=${encodeURIComponent(message)}`;

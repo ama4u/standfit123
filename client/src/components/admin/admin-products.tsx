@@ -65,7 +65,9 @@ export default function AdminProducts() {
   const { data: products, isLoading: loadingProducts } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await fetch("/api/products");
+      const res = await fetch("/api/products", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
@@ -74,7 +76,9 @@ export default function AdminProducts() {
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const res = await fetch("/api/categories");
+      const res = await fetch("/api/categories", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch categories");
       return res.json();
     },
@@ -416,11 +420,18 @@ export default function AdminProducts() {
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="uncategorized">Uncategorized</SelectItem>
-                  {categories?.map((category: any) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
+                  {categories?.map((category: any) => {
+                    // Skip categories with empty or invalid IDs
+                    if (!category.id || category.id.toString().trim() === '') {
+                      console.warn('Skipping category with empty ID:', category);
+                      return null;
+                    }
+                    return (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -683,12 +694,19 @@ export default function AdminProducts() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Category</SelectItem>
-                    {categories?.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="none">No Category</SelectItem>
+                    {categories?.map((category: any) => {
+                      // Skip categories with empty or invalid IDs
+                      if (!category.id || category.id.toString().trim() === '') {
+                        console.warn('Skipping category with empty ID:', category);
+                        return null;
+                      }
+                      return (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

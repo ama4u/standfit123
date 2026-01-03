@@ -39,7 +39,9 @@ export default function AdminOrders() {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/orders");
+      const res = await fetch("/api/admin/orders", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch orders");
       return res.json();
     },
@@ -50,6 +52,7 @@ export default function AdminOrders() {
       const res = await fetch(`/api/admin/orders/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Failed to update status");
@@ -66,7 +69,10 @@ export default function AdminOrders() {
 
   const deleteOrderMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/orders/${id}`, { 
+        method: "DELETE",
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to delete order");
     },
     onSuccess: () => {

@@ -59,7 +59,9 @@ export default function AdminDashboard() {
   const { data: reports } = useQuery({
     queryKey: ["admin-reports"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/reports");
+      const res = await fetch("/api/admin/reports", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch reports");
       return res.json();
     },
@@ -68,7 +70,9 @@ export default function AdminDashboard() {
   const { data: recentActivity } = useQuery({
     queryKey: ["admin-activity"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/activity");
+      const res = await fetch("/api/admin/activity", {
+        credentials: 'include'
+      });
       if (!res.ok) return [];
       return res.json();
     },

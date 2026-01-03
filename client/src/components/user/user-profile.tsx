@@ -22,6 +22,7 @@ export default function UserProfile({ user }: { user: any }) {
       const res = await fetch("/api/user/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Failed to update profile");

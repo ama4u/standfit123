@@ -54,7 +54,7 @@ export function createWhatsAppOrderMessage(details: WhatsAppOrderDetails): strin
     message += "\n";
   }
   
-   message += "Please confirm availability, delivery time and total cost including delivery.\n\n*Payment Details:*\nPlease provide your account details for payment processing:\n- Account Name\n- Bank Name\n- Account Number\n\nThank you!";
+   message += "Please confirm availability, delivery time and total cost including delivery.\n\nThank you!";
   
   return message;
 }

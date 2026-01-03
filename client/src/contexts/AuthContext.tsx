@@ -43,7 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function checkAuth() {
     try {
       // Check user authentication
-      const userRes = await fetch("/api/auth/me");
+      const userRes = await fetch("/api/auth/me", {
+        credentials: 'include'
+      });
       if (userRes.ok) {
         const data = await userRes.json();
         setUser(data);
@@ -54,7 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Check admin authentication
-      const adminRes = await fetch("/api/auth/admin/me");
+      const adminRes = await fetch("/api/auth/admin/me", {
+        credentials: 'include'
+      });
       if (adminRes.ok) {
         const data = await adminRes.json();
         setAdmin(data);
@@ -71,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      credentials: 'include'
     });
 
     if (!res.ok) {
@@ -88,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
+      credentials: 'include'
     });
 
     if (!res.ok) {
@@ -105,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
+      credentials: 'include'
     });
 
     if (!res.ok) {
@@ -118,7 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { 
+      method: "POST",
+      credentials: 'include'
+    });
     setUser(null);
     setAdmin(null);
     navigate("/");

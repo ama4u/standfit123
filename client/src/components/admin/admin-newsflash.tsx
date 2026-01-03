@@ -21,7 +21,11 @@ export default function AdminNewsFlash() {
     mutationFn: async (file: File) => {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/admin/upload-media", { method: "POST", body: fd });
+      const res = await fetch("/api/admin/upload-media", { 
+        method: "POST", 
+        body: fd,
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Upload failed");
       return res.json() as Promise<{ url: string; publicId: string; resourceType: string }>;
     },
@@ -32,6 +36,7 @@ export default function AdminNewsFlash() {
       const res = await fetch("/api/admin/newsflash", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Failed to create news item");
@@ -42,7 +47,10 @@ export default function AdminNewsFlash() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/newsflash/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/newsflash/${id}`, { 
+        method: "DELETE",
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to delete");
       return res.json();
     },

@@ -23,7 +23,9 @@ export default function UserDashboard() {
   const { data: orders } = useQuery({
     queryKey: ["user-orders"],
     queryFn: async () => {
-      const res = await fetch("/api/user/orders");
+      const res = await fetch("/api/user/orders", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch orders");
       return res.json();
     },
@@ -33,7 +35,9 @@ export default function UserDashboard() {
   const { data: notifications } = useQuery({
     queryKey: ["user-notifications"],
     queryFn: async () => {
-      const res = await fetch("/api/user/notifications");
+      const res = await fetch("/api/user/notifications", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch notifications");
       return res.json();
     },

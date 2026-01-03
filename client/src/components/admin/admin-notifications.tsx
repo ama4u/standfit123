@@ -30,7 +30,9 @@ export default function AdminNotifications() {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["admin-notifications"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/notifications");
+      const res = await fetch("/api/admin/notifications", {
+        credentials: 'include'
+      });
       if (!res.ok) return [];
       return res.json();
     },
@@ -41,6 +43,7 @@ export default function AdminNotifications() {
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Failed to send notification");
@@ -60,7 +63,10 @@ export default function AdminNotifications() {
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/notifications/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/notifications/${id}`, { 
+        method: "DELETE",
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to delete notification");
     },
     onSuccess: () => {

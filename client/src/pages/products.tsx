@@ -73,11 +73,18 @@ export default function Products() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {categories?.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
+                    {categories?.map((category: any) => {
+                      // Skip categories with empty or invalid IDs
+                      if (!category.id || category.id.toString().trim() === '') {
+                        console.warn('Skipping category with empty ID:', category);
+                        return null;
+                      }
+                      return (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
