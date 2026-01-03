@@ -88,14 +88,6 @@ export default function CartDrawer() {
   });
 
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Login Required",
-        description: "Please login to place an order",
-        variant: "destructive",
-      });
-      return;
-    }
     setShowCheckout(true);
   };
 
