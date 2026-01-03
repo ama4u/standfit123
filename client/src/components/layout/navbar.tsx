@@ -26,10 +26,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, admin, logout, isAuthenticated, isAdmin } = useAuth();
 
-  // Auth state is managed by AuthContext
-    adminEmail: admin?.email 
-  });
-
   return (
     <nav className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 shadow-lg border-b-4 border-blue-700 sticky top-0 z-50 backdrop-blur-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
