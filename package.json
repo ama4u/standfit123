@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "dev:force": "node force-port-5000.js && npm run dev",
     "dev:fresh": "node reset-database.js && npm run db:push && npm run dev",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --alias:@shared=./shared",
     "postbuild": "npm run db:push",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
