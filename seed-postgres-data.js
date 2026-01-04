@@ -70,7 +70,7 @@ async function seedData() {
     const oilsCat = await sql`SELECT id FROM categories WHERE slug = 'oils-fats'`;
     const processedCat = await sql`SELECT id FROM categories WHERE slug = 'processed-foods'`;
     
-    // Products with Cloudinary URLs
+    // Products with proper placeholder images
     const products = [
       {
         name: 'Premium Basmati Rice',
@@ -79,7 +79,7 @@ async function seedData() {
         wholesalePrice: 2200,
         unit: 'kg',
         categoryId: grainsCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/premium-basmati-rice.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop&crop=center',
         featured: true
       },
       {
@@ -89,7 +89,7 @@ async function seedData() {
         wholesalePrice: 1600,
         unit: 'kg',
         categoryId: grainsCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/local-brown-rice.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop&crop=center',
         isLocallyMade: true
       },
       {
@@ -99,7 +99,7 @@ async function seedData() {
         wholesalePrice: 1000,
         unit: 'kg',
         categoryId: legumesCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/black-beans.svg'
+        imageUrl: 'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=400&h=400&fit=crop&crop=center'
       },
       {
         name: 'Red Kidney Beans',
@@ -108,7 +108,7 @@ async function seedData() {
         wholesalePrice: 1200,
         unit: 'kg',
         categoryId: legumesCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/red-kidney-beans.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=400&fit=crop&crop=center',
         featured: true
       },
       {
@@ -119,7 +119,7 @@ async function seedData() {
         unit: 'g',
         packageSize: 500,
         categoryId: spicesCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/curry-powder.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=400&fit=crop&crop=center',
         isLocallyMade: true
       },
       {
@@ -130,7 +130,7 @@ async function seedData() {
         unit: 'g',
         packageSize: 250,
         categoryId: spicesCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/turmeric-powder.svg'
+        imageUrl: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=400&h=400&fit=crop&crop=center'
       },
       {
         name: 'Palm Oil',
@@ -139,7 +139,7 @@ async function seedData() {
         wholesalePrice: 2700,
         unit: 'liters',
         categoryId: oilsCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/palm-oil.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop&crop=center',
         isLocallyMade: true,
         featured: true
       },
@@ -150,7 +150,7 @@ async function seedData() {
         wholesalePrice: 2000,
         unit: 'liters',
         categoryId: oilsCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/vegetable-oil.svg'
+        imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop&crop=center'
       },
       {
         name: 'Instant Noodles',
@@ -160,7 +160,7 @@ async function seedData() {
         unit: 'pack',
         minOrderQuantity: 12,
         categoryId: processedCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/instant-noodles.svg'
+        imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop&crop=center'
       },
       {
         name: 'Plantain Chips',
@@ -170,7 +170,7 @@ async function seedData() {
         unit: 'g',
         packageSize: 200,
         categoryId: processedCat[0].id,
-        imageUrl: 'https://res.cloudinary.com/dih456opf/image/upload/v1735995600/standfit-products/plantain-chips.svg',
+        imageUrl: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&h=400&fit=crop&crop=center',
         isLocallyMade: true
       }
     ];
