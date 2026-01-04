@@ -123,11 +123,16 @@ export default function AdminNewsFlash() {
                     if (!file) return;
                     try {
                       const uploaded = await uploadMutation.mutateAsync(file);
+                      console.log('Upload response:', uploaded); // Debug log
+                      
+                      // Ensure we have the required fields
+                      const mediaType = uploaded.resourceType || (file.type.startsWith('video/') ? 'video' : 'image');
+                      
                       await createMutation.mutateAsync({ 
                         title: title.trim() || null, 
                         url: uploaded.url, 
-                        mediaType: uploaded.resourceType,
-                        publicId: uploaded.publicId
+                        mediaType: mediaType,
+                        publicId: uploaded.publicId || null
                       });
                       setTitle(''); 
                       setFile(null); 
