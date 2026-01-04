@@ -7,6 +7,15 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Initialize database persistence system
+console.log('🛡️  Initializing database persistence...');
+try {
+  const { ensureDatabasePersistence } = await import("../auto-backup-restore.js");
+  await ensureDatabasePersistence();
+} catch (error) {
+  console.error('⚠️  Database persistence system failed to initialize:', error.message);
+}
+
 // Trust proxy for Heroku
 app.set('trust proxy', 1);
 
