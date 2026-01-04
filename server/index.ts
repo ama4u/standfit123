@@ -38,14 +38,6 @@ app.use(
   })
 );
 
-// Debug middleware to log session info
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    console.log(`${req.method} ${req.path} - Session ID: ${req.sessionID}, User ID: ${req.session?.userId}, Admin ID: ${req.session?.adminId}`);
-  }
-  next();
-});
-
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

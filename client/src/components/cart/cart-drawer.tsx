@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function CartDrawer() {
   const { items, updateQuantity, removeFromCart, getTotalItems, getTotalPrice, clearCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -30,12 +30,12 @@ export default function CartDrawer() {
   const { data: userProfile } = useQuery({
     queryKey: ['/api/user/profile'],
     queryFn: async () => {
-      if (!isAuthenticated) return null;
+      if (!user) return null; // Only fetch if there's a user (not admin)
       const res = await fetch('/api/user/profile', { credentials: 'include' });
       if (!res.ok) return null;
       return res.json();
     },
-    enabled: isAuthenticated,
+    enabled: !!user, // Only enable when there's a user
   });
 
   // Pre-fill address when checkout dialog opens

@@ -482,8 +482,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Send notification
   app.post("/api/admin/notifications", requireAdmin, async (req, res) => {
     try {
-      const { userId, message, type } = req.body;
-      const notification = await storage.createNotification({ userId, title: "Message from Admin", message, type: type || "admin_message" });
+      const { title, message, type } = req.body;
+      const notification = await storage.createNotification({ 
+        userId: null, // Admin notifications don't need a specific user
+        title: title || "Message from Admin", 
+        message, 
+        type: type || "admin_message" 
+      });
       res.json(notification);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
