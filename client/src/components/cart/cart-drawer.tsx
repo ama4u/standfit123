@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ShoppingCart, Plus, Minus, Trash2, MessageCircle, Package } from 'lucide-react';
@@ -25,6 +26,11 @@ export default function CartDrawer() {
   const [shippingAddress, setShippingAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
   const [notes, setNotes] = useState('');
+  
+  // Customer information for guest orders
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Fetch user profile to pre-fill address
   const { data: userProfile } = useQuery({
@@ -52,7 +58,8 @@ export default function CartDrawer() {
 
   const placeOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      const response = await fetch('/api/user/orders', {
+      // Use guest orders endpoint since customers don't need to be logged in
+      const response = await fetch('/api/guest/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
@@ -88,6 +95,34 @@ export default function CartDrawer() {
   };
 
   const handlePlaceOrder = () => {
+    // Validate customer information
+    if (!customerName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your full name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!customerEmail.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!customerPhone.trim()) {
+      toast({
+        title: "Phone Required",
+        description: "Please enter your phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (fulfillmentMethod === 'delivery' && !shippingAddress.trim()) {
       toast({
         title: "Address Required",
@@ -102,6 +137,9 @@ export default function CartDrawer() {
         productId: item.id,
         quantity: item.quantity,
       })),
+      customerName: customerName.trim(),
+      customerEmail: customerEmail.trim(),
+      customerPhone: customerPhone.trim(),
       fulfillmentMethod,
       shippingAddress: fulfillmentMethod === 'delivery' ? shippingAddress.trim() : null,
       paymentMethod,
@@ -182,6 +220,9 @@ export default function CartDrawer() {
     setIsOpen(false);
     setShippingAddress('');
     setNotes('');
+    setCustomerName('');
+    setCustomerEmail('');
+    setCustomerPhone('');
     
     toast({
       title: "Order Sent via WhatsApp",
@@ -335,6 +376,41 @@ export default function CartDrawer() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            <div className="space-y-4 border-b pb-4">
+              <h3 className="font-semibold text-sm text-blue-600">Customer Information</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="customerName">Full Name *</Label>
+                <Input
+                  id="customerName"
+                  placeholder="Enter your full name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customerEmail">Email Address *</Label>
+                <Input
+                  id="customerEmail"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="customerPhone">Phone Number *</Label>
+                <Input
+                  id="customerPhone"
+                  placeholder="Enter your phone number"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Fulfillment Method</Label>
               <RadioGroup value={fulfillmentMethod} onValueChange={(v) => setFulfillmentMethod(v as 'delivery' | 'pickup')}>
@@ -404,7 +480,14 @@ export default function CartDrawer() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCheckout(false)} className="border-2 border-gray-300">
+            <Button variant="outline" onClick={() => {
+              setShowCheckout(false);
+              setCustomerName('');
+              setCustomerEmail('');
+              setCustomerPhone('');
+              setShippingAddress('');
+              setNotes('');
+            }} className="border-2 border-gray-300">
               Cancel
             </Button>
             <Button 

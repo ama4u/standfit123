@@ -625,6 +625,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(order);
   });
 
+  // Guest: Create order (no authentication required)
+  app.post("/api/guest/orders", async (req, res) => {
+    try {
+      const { items, customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, notes, fulfillmentMethod } = req.body as {
+        items: { productId: string; quantity: number }[];
+        customerName: string;
+        customerEmail: string;
+        customerPhone: string;
+        shippingAddress: string;
+        paymentMethod?: string;
+        notes?: string;
+        fulfillmentMethod?: string;
+      };
+
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Order items are required" });
+      }
+
+      if (!customerName || !customerEmail || !customerPhone) {
+        return res.status(400).json({ message: "Customer name, email, and phone are required" });
+      }
+
+      const resolvedItems = [] as { productId: string; quantity: number; priceAtOrder: number }[];
+      let totalAmount = 0;
+      
+      for (const item of items) {
+        const product = await storage.getProduct(item.productId);
+        if (!product) return res.status(400).json({ message: `Product ${item.productId} not found` });
+        const price = Number(product.price);
+        const subtotal = price * item.quantity;
+        totalAmount += subtotal;
+        resolvedItems.push({ 
+          productId: item.productId, 
+          quantity: item.quantity, 
+          priceAtOrder: price 
+        });
+      }
+
+      const order = await storage.createOrder(
+        {
+          userId: null, // Guest order
+          customerName,
+          customerEmail,
+          customerPhone,
+          totalAmount,
+          status: "pending",
+          shippingAddress: shippingAddress || "",
+          paymentMethod: paymentMethod || "cash_on_delivery",
+          notes: notes || null,
+        },
+        resolvedItems
+      );
+
+      res.json(order);
+    } catch (error: any) {
+      console.error('Guest order creation error:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // User: Create order
   app.post("/api/user/orders", requireAuth, async (req, res) => {
     try {
