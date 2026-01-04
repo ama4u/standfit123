@@ -32,20 +32,46 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "standfit-wholesale-secret-key-change-in-production",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false, // Set to false for Heroku compatibility
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: 'lax',
-    },
-  })
-);
+// Session configuration with PostgreSQL store for production
+let sessionConfig: any = {
+  secret: process.env.SESSION_SECRET || "standfit-wholesale-secret-key-change-in-production",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to false for Heroku compatibility
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    sameSite: 'lax',
+  },
+};
+
+// Use PostgreSQL session store in production
+if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+  try {
+    const pgSession = (await import('connect-pg-simple')).default(session);
+    const { Pool } = await import('pg');
+    
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    
+    sessionConfig.store = new pgSession({
+      pool: pool,
+      tableName: 'user_sessions',
+      createTableIfMissing: true,
+    });
+    
+    console.log('🗄️  Using PostgreSQL session store');
+  } catch (error) {
+    console.error('⚠️  Failed to setup PostgreSQL session store:', error.message);
+    console.log('📝 Falling back to memory store');
+  }
+} else {
+  console.log('💾 Using memory session store (development)');
+}
+
+app.use(session(sessionConfig));
 
 // Debug middleware for sessions
 app.use((req, res, next) => {
