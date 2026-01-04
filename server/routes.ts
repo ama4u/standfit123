@@ -511,16 +511,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: create news flash item
   app.post("/api/admin/newsflash", requireAdmin, async (req, res) => {
     try {
-      const { title, url, mediaType, message, publicId } = req.body;
+      const { title, url, mediaType, content, message, publicId } = req.body;
       
       if (mediaType === 'text') {
-        // Text-only news flash
-        if (!message) return res.status(400).json({ message: "message required for text posts" });
+        // Text-only news flash - accept both 'content' and 'message' for backward compatibility
+        const textContent = content || message;
+        if (!textContent) return res.status(400).json({ message: "content required for text posts" });
         const item = await storage.createNewsFlashItem({ 
           title: title || "News Update", 
           url: null, 
           mediaType: 'text',
-          content: message,
+          content: textContent,
           publicId: null
         });
         res.json(item);
@@ -537,6 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(item);
       }
     } catch (error: any) {
+      console.error("Error creating news flash item:", error);
       res.status(400).json({ message: error.message });
     }
   });
