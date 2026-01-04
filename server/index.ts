@@ -1,16 +1,38 @@
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
 import session from "express-session";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Import SQLite session store
+const SQLiteStore = require('connect-sqlite3')(session);
+
 const app = express();
+
+// Trust proxy for Heroku
+app.set('trust proxy', 1);
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === "production" 
+    ? ["https://standfit-e816d09b795a.herokuapp.com"]
+    : ["http://localhost:5000", "http://localhost:3000"],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Session configuration
 app.use(
   session({
+    store: new SQLiteStore({
+      db: 'sessions.db',
+      dir: './data'
+    }),
     secret: process.env.SESSION_SECRET || "standfit-wholesale-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
@@ -18,9 +40,18 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      sameSite: 'lax',
     },
   })
 );
+
+// Debug middleware to log session info
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    console.log(`${req.method} ${req.path} - Session ID: ${req.sessionID}, User ID: ${req.session?.userId}, Admin ID: ${req.session?.adminId}`);
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -6,7 +6,9 @@ export default function NewsFlash() {
   const { data: items, isLoading } = useQuery({
     queryKey: ["newsflash"],
     queryFn: async () => {
-      const res = await fetch("/api/newsflash");
+      const res = await fetch("/api/newsflash", {
+        credentials: 'include'
+      });
       if (!res.ok) throw new Error("Failed to fetch news flash");
       return res.json();
     },
