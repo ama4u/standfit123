@@ -92,8 +92,8 @@ export interface IStorage {
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
   
   // Order operations
-  getOrders(): Promise<Order[]>;
-  getOrder(id: string): Promise<Order | undefined>;
+  getOrders(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
+  getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
   createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   deleteOrder(id: string): Promise<void>;
@@ -230,20 +230,39 @@ export class PostgreSQLStorage implements IStorage {
         featured: products.featured,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
-        category: {
-          id: categories.id,
-          name: categories.name,
-          description: categories.description,
-          slug: categories.slug
-        }
+        categoryName: categories.name,
+        categoryDescription: categories.description,
+        categorySlug: categories.slug
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .orderBy(desc(products.createdAt));
     
     return result.map(row => ({
-      ...row,
-      category: row.category && row.category.id ? row.category : null
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      wholesalePrice: row.wholesalePrice,
+      unit: row.unit,
+      minOrderQuantity: row.minOrderQuantity,
+      packageSize: row.packageSize,
+      packageUnit: row.packageUnit,
+      categoryId: row.categoryId,
+      imageUrl: row.imageUrl,
+      isLocallyMade: row.isLocallyMade,
+      inStock: row.inStock,
+      featured: row.featured,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId!,
+        name: row.categoryName,
+        description: row.categoryDescription,
+        slug: row.categorySlug!,
+        createdAt: null,
+        updatedAt: null
+      } : null
     }));
   }
 
@@ -266,12 +285,9 @@ export class PostgreSQLStorage implements IStorage {
         featured: products.featured,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
-        category: {
-          id: categories.id,
-          name: categories.name,
-          description: categories.description,
-          slug: categories.slug
-        }
+        categoryName: categories.name,
+        categoryDescription: categories.description,
+        categorySlug: categories.slug
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
@@ -279,8 +295,30 @@ export class PostgreSQLStorage implements IStorage {
       .orderBy(desc(products.createdAt));
     
     return result.map(row => ({
-      ...row,
-      category: row.category && row.category.id ? row.category : null
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      wholesalePrice: row.wholesalePrice,
+      unit: row.unit,
+      minOrderQuantity: row.minOrderQuantity,
+      packageSize: row.packageSize,
+      packageUnit: row.packageUnit,
+      categoryId: row.categoryId,
+      imageUrl: row.imageUrl,
+      isLocallyMade: row.isLocallyMade,
+      inStock: row.inStock,
+      featured: row.featured,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId!,
+        name: row.categoryName,
+        description: row.categoryDescription,
+        slug: row.categorySlug!,
+        createdAt: null,
+        updatedAt: null
+      } : null
     }));
   }
 
@@ -303,12 +341,9 @@ export class PostgreSQLStorage implements IStorage {
         featured: products.featured,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
-        category: {
-          id: categories.id,
-          name: categories.name,
-          description: categories.description,
-          slug: categories.slug
-        }
+        categoryName: categories.name,
+        categoryDescription: categories.description,
+        categorySlug: categories.slug
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
@@ -316,8 +351,30 @@ export class PostgreSQLStorage implements IStorage {
       .orderBy(desc(products.createdAt));
     
     return result.map(row => ({
-      ...row,
-      category: row.category && row.category.id ? row.category : null
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      wholesalePrice: row.wholesalePrice,
+      unit: row.unit,
+      minOrderQuantity: row.minOrderQuantity,
+      packageSize: row.packageSize,
+      packageUnit: row.packageUnit,
+      categoryId: row.categoryId,
+      imageUrl: row.imageUrl,
+      isLocallyMade: row.isLocallyMade,
+      inStock: row.inStock,
+      featured: row.featured,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId!,
+        name: row.categoryName,
+        description: row.categoryDescription,
+        slug: row.categorySlug!,
+        createdAt: null,
+        updatedAt: null
+      } : null
     }));
   }
 
@@ -340,12 +397,9 @@ export class PostgreSQLStorage implements IStorage {
         featured: products.featured,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
-        category: {
-          id: categories.id,
-          name: categories.name,
-          description: categories.description,
-          slug: categories.slug
-        }
+        categoryName: categories.name,
+        categoryDescription: categories.description,
+        categorySlug: categories.slug
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
@@ -355,8 +409,30 @@ export class PostgreSQLStorage implements IStorage {
     
     const row = result[0];
     return {
-      ...row,
-      category: row.category && row.category.id ? row.category : null
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      wholesalePrice: row.wholesalePrice,
+      unit: row.unit,
+      minOrderQuantity: row.minOrderQuantity,
+      packageSize: row.packageSize,
+      packageUnit: row.packageUnit,
+      categoryId: row.categoryId,
+      imageUrl: row.imageUrl,
+      isLocallyMade: row.isLocallyMade,
+      inStock: row.inStock,
+      featured: row.featured,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: row.categoryName ? {
+        id: row.categoryId!,
+        name: row.categoryName,
+        description: row.categoryDescription,
+        slug: row.categorySlug!,
+        createdAt: null,
+        updatedAt: null
+      } : null
     };
   }
 
@@ -462,7 +538,7 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   // Order operations
-  async getOrders(): Promise<Order[]> {
+  async getOrders(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
     const ordersData = await db.select().from(orders).orderBy(desc(orders.createdAt));
     
     return await Promise.all(
@@ -484,7 +560,7 @@ export class PostgreSQLStorage implements IStorage {
     );
   }
 
-  async getOrder(id: string): Promise<Order | undefined> {
+  async getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
     if (!order) return undefined;
 

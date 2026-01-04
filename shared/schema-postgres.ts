@@ -215,6 +215,17 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   createdAt: true,
 });
 
+// Create missing insert schemas
+export const insertWeeklyDealSchema = createInsertSchema(weeklyDeals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStoreLocationSchema = createInsertSchema(storeLocations).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type exports
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
@@ -224,6 +235,10 @@ export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type WeeklyDeal = typeof weeklyDeals.$inferSelect;
+export type InsertWeeklyDeal = z.infer<typeof insertWeeklyDealSchema>;
+export type StoreLocation = typeof storeLocations.$inferSelect;
+export type InsertStoreLocation = z.infer<typeof insertStoreLocationSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type NewsFlashItem = typeof newsFlashItems.$inferSelect;
