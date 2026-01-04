@@ -30,10 +30,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to false for now to test
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
     },
   })
 );

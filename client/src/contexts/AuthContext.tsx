@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await res.json();
     setAdmin(data);
-    navigate("/admin");
+    // Don't navigate here - let the calling component handle navigation
   }
 
   async function register(userData: any) {

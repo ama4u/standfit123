@@ -619,22 +619,23 @@ export default function AdminProducts() {
                     if (file) handleImageUpload(file);
                   }}
                   className="hidden"
-                  id="product-image"
+                  id="add-product-image"
                 />
-                <Label htmlFor="product-image" className="cursor-pointer">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="mt-4"
-                    disabled={uploadImageMutation.isPending}
-                  >
-                    {uploadImageMutation.isPending ? (
+                <Label 
+                  htmlFor="add-product-image" 
+                  className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-4"
+                >
+                  {uploadImageMutation.isPending ? (
+                    <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
                       <Upload className="w-4 h-4 mr-2" />
-                    )}
-                    {uploadImageMutation.isPending ? "Uploading..." : "Choose Image"}
-                  </Button>
+                      Choose Image
+                    </>
+                  )}
                 </Label>
               </div>
             </div>
