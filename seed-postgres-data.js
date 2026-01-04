@@ -189,12 +189,6 @@ async function seedData() {
           ${product.categoryId}, ${product.imageUrl}, ${product.isLocallyMade || false},
           true, ${product.featured || false}
         )
-        ON CONFLICT (name) DO UPDATE SET
-          description = EXCLUDED.description,
-          price = EXCLUDED.price,
-          wholesale_price = EXCLUDED.wholesale_price,
-          image_url = EXCLUDED.image_url,
-          updated_at = NOW()
       `;
     }
     
