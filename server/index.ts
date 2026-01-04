@@ -5,9 +5,6 @@ import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Import SQLite session store
-const SQLiteStore = require('connect-sqlite3')(session);
-
 const app = express();
 
 // Trust proxy for Heroku
@@ -29,15 +26,11 @@ app.use(express.urlencoded({ extended: false }));
 // Session configuration
 app.use(
   session({
-    store: new SQLiteStore({
-      db: 'sessions.db',
-      dir: './data'
-    }),
     secret: process.env.SESSION_SECRET || "standfit-wholesale-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for now to test
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       sameSite: 'lax',
