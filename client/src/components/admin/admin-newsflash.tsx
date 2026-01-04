@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Upload, Trash } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Upload, Trash, MessageSquare, Image as ImageIcon } from "lucide-react";
 
 export default function AdminNewsFlash() {
   const qc = useQueryClient();
@@ -45,6 +47,25 @@ export default function AdminNewsFlash() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["newsflash-items"] }),
   });
 
+  const createTextMutation = useMutation({
+    mutationFn: async (payload: { title: string; message: string }) => {
+      const res = await fetch("/api/admin/newsflash", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: payload.title,
+          url: null, // No URL for text-only
+          mediaType: 'text',
+          message: payload.message
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create text news item");
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["newsflash-items"] }),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/admin/newsflash/${id}`, { 
@@ -60,6 +81,8 @@ export default function AdminNewsFlash() {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [mode, setMode] = useState<'media' | 'text'>('media');
+  const [textMessage, setTextMessage] = useState("");
 
   return (
     <div className="space-y-6">
@@ -81,78 +104,127 @@ export default function AdminNewsFlash() {
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Short title or caption" />
           </div>
 
-          <div>
-            <Label className="font-semibold">Media (Image or MP4 Video)</Label>
-            <div className="p-4 border-2 border-dashed border-purple-300 rounded-lg bg-purple-50/50">
-              <div className="flex flex-col gap-4">
-                <Input 
-                  type="file" 
-                  accept="image/*,video/mp4" 
-                  onChange={(e) => {
-                    const f = e.target.files?.[0] || null;
-                    setFile(f);
-                    if (f) setPreview(URL.createObjectURL(f));
-                  }}
-                  className="border-purple-200"
-                />
-                
-                {preview && (
-                  <div className="flex justify-center">
-                    <div className="relative">
-                      {file?.type.startsWith('video') ? (
-                        <video src={preview} className="h-32 rounded-md shadow-md" controls />
-                      ) : (
-                        <img src={preview} className="h-32 rounded-md object-cover shadow-md" />
-                      )}
-                      <div className="absolute -top-2 -right-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          file?.type.startsWith('video') 
-                            ? 'bg-red-500 text-white' 
-                            : 'bg-blue-500 text-white'
-                        }`}>
-                          {file?.type.startsWith('video') ? '📹' : '📸'}
-                        </span>
+          <Tabs value={mode} onValueChange={(value) => setMode(value as 'media' | 'text')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="media" className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" />
+                Media Upload
+              </TabsTrigger>
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Text Message
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="media" className="space-y-4">
+              <div>
+                <Label className="font-semibold">Media (Image or MP4 Video)</Label>
+                <div className="p-4 border-2 border-dashed border-purple-300 rounded-lg bg-purple-50/50">
+                  <div className="flex flex-col gap-4">
+                    <Input 
+                      type="file" 
+                      accept="image/*,video/mp4" 
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null;
+                        setFile(f);
+                        if (f) setPreview(URL.createObjectURL(f));
+                      }}
+                      className="border-purple-200"
+                    />
+                    
+                    {preview && (
+                      <div className="flex justify-center">
+                        <div className="relative">
+                          {file?.type.startsWith('video') ? (
+                            <video src={preview} className="h-32 rounded-md shadow-md" controls />
+                          ) : (
+                            <img src={preview} className="h-32 rounded-md object-cover shadow-md" />
+                          )}
+                          <div className="absolute -top-2 -right-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              file?.type.startsWith('video') 
+                                ? 'bg-red-500 text-white' 
+                                : 'bg-blue-500 text-white'
+                            }`}>
+                              {file?.type.startsWith('video') ? '📹' : '📸'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    
+                    <Button 
+                      disabled={!file || uploadMutation.isPending || createMutation.isPending} 
+                      onClick={async () => {
+                        if (!file) return;
+                        try {
+                          const uploaded = await uploadMutation.mutateAsync(file);
+                          console.log('Upload response:', uploaded); // Debug log
+                          
+                          // Ensure we have the required fields
+                          const mediaType = uploaded.resourceType || (file.type.startsWith('video/') ? 'video' : 'image');
+                          
+                          await createMutation.mutateAsync({ 
+                            title: title.trim() || null, 
+                            url: uploaded.url, 
+                            mediaType: mediaType,
+                            publicId: uploaded.publicId || null
+                          });
+                          setTitle(''); 
+                          setFile(null); 
+                          setPreview(null);
+                          // Reset file input
+                          const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                          if (fileInput) fileInput.value = '';
+                        } catch (error) {
+                          console.error('Upload failed:', error);
+                          alert('Upload failed. Please try again or check your internet connection.');
+                        }
+                      }} 
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"
+                    >
+                      <Upload className="w-4 h-4 mr-2" /> 
+                      {uploadMutation.isPending || createMutation.isPending ? 'Uploading...' : 'Upload & Publish'}
+                    </Button>
                   </div>
-                )}
-                
-                <Button 
-                  disabled={!file || uploadMutation.isPending || createMutation.isPending} 
-                  onClick={async () => {
-                    if (!file) return;
-                    try {
-                      const uploaded = await uploadMutation.mutateAsync(file);
-                      console.log('Upload response:', uploaded); // Debug log
-                      
-                      // Ensure we have the required fields
-                      const mediaType = uploaded.resourceType || (file.type.startsWith('video/') ? 'video' : 'image');
-                      
-                      await createMutation.mutateAsync({ 
-                        title: title.trim() || null, 
-                        url: uploaded.url, 
-                        mediaType: mediaType,
-                        publicId: uploaded.publicId || null
-                      });
-                      setTitle(''); 
-                      setFile(null); 
-                      setPreview(null);
-                      // Reset file input
-                      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                      if (fileInput) fileInput.value = '';
-                    } catch (error) {
-                      console.error('Upload failed:', error);
-                      alert('Upload failed. Please try again or check your internet connection.');
-                    }
-                  }} 
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"
-                >
-                  <Upload className="w-4 h-4 mr-2" /> 
-                  {uploadMutation.isPending || createMutation.isPending ? 'Uploading...' : 'Upload & Publish'}
-                </Button>
+                </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="text" className="space-y-4">
+              <div>
+                <Label className="font-semibold">Message</Label>
+                <Textarea 
+                  value={textMessage} 
+                  onChange={(e) => setTextMessage(e.target.value)} 
+                  placeholder="Type your news flash message here..."
+                  className="min-h-[120px] border-purple-200"
+                />
+              </div>
+              
+              <Button 
+                disabled={!textMessage.trim() || createTextMutation.isPending} 
+                onClick={async () => {
+                  if (!textMessage.trim()) return;
+                  try {
+                    await createTextMutation.mutateAsync({ 
+                      title: title.trim() || "News Update", 
+                      message: textMessage.trim()
+                    });
+                    setTitle(''); 
+                    setTextMessage('');
+                  } catch (error) {
+                    console.error('Create text news failed:', error);
+                    alert('Failed to create text news. Please try again.');
+                  }
+                }} 
+                className="bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" /> 
+                {createTextMutation.isPending ? 'Publishing...' : 'Publish Text Message'}
+              </Button>
+            </TabsContent>
+          </Tabs>
 
         </CardContent>
       </Card>
@@ -172,7 +244,11 @@ export default function AdminNewsFlash() {
                 <div key={it.id} className="p-4 border rounded-lg bg-white/80 backdrop-blur-sm border-purple-200 hover:shadow-md transition-all duration-200">
                   <div className="flex items-start gap-4">
                     <div className="w-32 h-24 overflow-hidden rounded-md bg-gray-100 relative">
-                      {it.mediaType === 'video' ? (
+                      {it.mediaType === 'text' ? (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                          <MessageSquare className="w-8 h-8 text-white" />
+                        </div>
+                      ) : it.mediaType === 'video' ? (
                         <video src={it.url} className="w-full h-full object-cover" controls />
                       ) : (
                         <img src={it.url} className="w-full h-full object-cover" />
@@ -181,9 +257,11 @@ export default function AdminNewsFlash() {
                         <span className={`px-1 py-0.5 rounded text-xs font-medium ${
                           it.mediaType === 'video' 
                             ? 'bg-red-500 text-white' 
+                            : it.mediaType === 'text'
+                            ? 'bg-green-500 text-white'
                             : 'bg-blue-500 text-white'
                         }`}>
-                          {it.mediaType === 'video' ? '📹' : '📸'}
+                          {it.mediaType === 'video' ? '📹' : it.mediaType === 'text' ? '💬' : '📸'}
                         </span>
                       </div>
                     </div>
@@ -191,6 +269,11 @@ export default function AdminNewsFlash() {
                       <h4 className="font-semibold text-gray-800 truncate">
                         {it.title || 'Untitled'}
                       </h4>
+                      {it.mediaType === 'text' && it.content && (
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {it.content}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {new Date(it.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',

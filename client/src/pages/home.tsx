@@ -21,7 +21,8 @@ import {
   Users,
   Calendar,
   Play,
-  Image as ImageIcon
+  Image as ImageIcon,
+  MessageSquare
 } from "lucide-react";
 
 export default function Home() {
@@ -130,46 +131,67 @@ export default function Home() {
           ) : newsFlashItems && newsFlashItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {newsFlashItems.slice(0, 3).map((item: any) => (
-                <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    {item.mediaType === 'video' ? (
-                      <div className="relative h-48 bg-gray-100 flex items-center justify-center">
-                        <video 
-                          src={item.url} 
-                          className="w-full h-full object-cover"
-                          poster={item.thumbnail}
-                        />
-                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                          <Play className="w-12 h-12 text-white" />
+                <Link key={item.id} href="/news-flash">
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                    <div className="relative">
+                      {item.mediaType === 'text' ? (
+                        <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                          <div className="text-center text-white p-4">
+                            <MessageSquare className="w-12 h-12 mx-auto mb-2" />
+                            <p className="text-sm font-medium">Text Message</p>
+                            {item.content && (
+                              <p className="text-xs mt-2 line-clamp-3 opacity-90">
+                                {item.content}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="relative h-48 bg-gray-100 flex items-center justify-center">
-                        <img 
-                          src={item.url} 
-                          alt={item.title || "News Flash"} 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <div className="hidden absolute inset-0 flex items-center justify-center">
-                          <ImageIcon className="w-12 h-12 text-gray-400" />
+                      ) : item.mediaType === 'video' ? (
+                        <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                          <video 
+                            src={item.url} 
+                            className="w-full h-full object-cover"
+                            poster={item.thumbnail}
+                          />
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            <Play className="w-12 h-12 text-white" />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    {item.title && (
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">{item.title}</h3>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </Card>
+                      ) : item.url ? (
+                        <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                          <img 
+                            src={item.url} 
+                            alt={item.title || "News Flash"} 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 flex items-center justify-center">
+                            <ImageIcon className="w-12 h-12 text-gray-400" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                          <div className="text-center text-white p-4">
+                            <MessageSquare className="w-12 h-12 mx-auto mb-2" />
+                            <p className="text-sm">Text Message</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      {item.title && (
+                        <h3 className="font-semibold text-lg mb-2 line-clamp-2">{item.title}</h3>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           ) : (
