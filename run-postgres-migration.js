@@ -1,6 +1,10 @@
-const postgres = require('postgres');
-const fs = require('fs');
-const path = require('path');
+import postgres from 'postgres';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function runMigration() {
   const databaseUrl = process.env.DATABASE_URL;
