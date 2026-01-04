@@ -10,9 +10,6 @@ import bcrypt from "bcryptjs";
 import { requireAuth, requireAdmin, verifyPassword } from "./auth";
 import { sendPasswordResetEmail } from "./email";
 import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
 
 // Single consolidated route registrar
 export async function registerRoutes(app: Express): Promise<Server> {

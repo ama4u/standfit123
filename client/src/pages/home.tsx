@@ -19,7 +19,9 @@ import {
   Heart,
   GraduationCap,
   Users,
-  Calendar
+  Calendar,
+  Play,
+  Image as ImageIcon
 } from "lucide-react";
 
 export default function Home() {
@@ -33,6 +35,11 @@ export default function Home() {
 
   const { data: storeLocations, isLoading: locationsLoading } = useQuery<any[]>({
     queryKey: ["/api/store-locations"],
+  });
+
+  // Fetch latest news flash items
+  const { data: newsFlashItems, isLoading: newsFlashLoading } = useQuery<any[]>({
+    queryKey: ["/api/newsflash"],
   });
 
   const categoryIcons = {
@@ -100,24 +107,88 @@ export default function Home() {
         </div>
       </section>
 
-      {/* News Flash Intro */}
+      {/* Latest News Flash */}
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/news-flash" className="block rounded-xl overflow-hidden shadow-lg transform hover:scale-[1.01] transition-all cursor-pointer">
-            <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 p-8 sm:p-12 text-white">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold">News Flash</h2>
-                  <p className="mt-2 text-sm sm:text-base text-white/90 max-w-xl">Catch up with our latest updates, promos, and short videos. Click to view the full News Flash page.</p>
-                </div>
-                <div className="text-right">
-                  <div className="inline-block bg-white/10 backdrop-blur-md rounded-lg px-4 py-2 border border-white/20">
-                    <span className="font-semibold">View Now →</span>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Latest News Flash</h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">Stay updated with our latest announcements, promotions, and updates</p>
+          </div>
+
+          {newsFlashLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                  <div className="p-4">
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
-                </div>
-              </div>
+                </Card>
+              ))}
             </div>
-          </Link>
+          ) : newsFlashItems && newsFlashItems.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {newsFlashItems.slice(0, 3).map((item: any) => (
+                <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    {item.mediaType === 'video' ? (
+                      <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                        <video 
+                          src={item.url} 
+                          className="w-full h-full object-cover"
+                          poster={item.thumbnail}
+                        />
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <Play className="w-12 h-12 text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+                        <img 
+                          src={item.url} 
+                          alt={item.title || "News Flash"} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="hidden absolute inset-0 flex items-center justify-center">
+                          <ImageIcon className="w-12 h-12 text-gray-400" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    {item.title && (
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">{item.title}</h3>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <ImageIcon className="w-16 h-16 mx-auto" />
+              </div>
+              <p className="text-muted-foreground">No news flash items available yet.</p>
+            </div>
+          )}
+
+          <div className="text-center">
+            <Link href="/news-flash">
+              <Button className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 hover:from-purple-700 hover:via-pink-600 hover:to-indigo-700 text-white">
+                View All News Flash
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 

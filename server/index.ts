@@ -30,13 +30,21 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for Heroku compatibility
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: process.env.NODE_ENV === "production" ? 'none' : 'lax',
+      sameSite: 'lax',
     },
   })
 );
+
+// Debug middleware for sessions
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/auth') || req.path.startsWith('/api/admin')) {
+    console.log(`${req.method} ${req.path} - Session ID: ${req.sessionID}, User: ${req.session?.userId}, Admin: ${req.session?.adminId}`);
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
