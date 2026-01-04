@@ -66,14 +66,10 @@ export default function CartDrawer() {
     },
     onSuccess: () => {
       toast({
-        title: "Order Placed Successfully!",
-        description: "Your order has been received and is being processed.",
+        title: "Order Saved Successfully!",
+        description: "Your order has been saved to our system and sent via WhatsApp.",
       });
-      clearCart();
-      setShowCheckout(false);
-      setIsOpen(false);
-      setShippingAddress('');
-      setNotes('');
+      // Don't clear cart here - let handleWhatsAppCheckout do it
       queryClient.invalidateQueries({ queryKey: ['/api/user/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/reports'] });
@@ -112,7 +108,11 @@ export default function CartDrawer() {
       notes: notes.trim() || null,
     };
 
+    // Save to database first
     placeOrderMutation.mutate(orderData);
+    
+    // Also send via WhatsApp for communication
+    handleWhatsAppCheckout();
   };
 
   const formatPrice = (price: number) => {
@@ -185,7 +185,7 @@ export default function CartDrawer() {
     
     toast({
       title: "Order Sent via WhatsApp",
-      description: "Your cart has been cleared. Please wait for confirmation on WhatsApp.",
+      description: "Your order has been sent via WhatsApp. Please wait for confirmation.",
     });
   };
 
@@ -408,17 +408,18 @@ export default function CartDrawer() {
               Cancel
             </Button>
             <Button 
-              onClick={handleWhatsAppCheckout} 
+              onClick={handlePlaceOrder} 
               disabled={placeOrderMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
             >
-              Place Order
+              {placeOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
             </Button>
             <Button 
               onClick={handleWhatsAppCheckout}
-              className="bg-green-600 hover:bg-green-700 text-white border-2 border-green-500"
+              variant="outline"
+              className="border-2 border-green-300 text-green-600 hover:bg-green-50"
             >
-              Send via WhatsApp
+              WhatsApp Only
             </Button>
           </DialogFooter>
         </DialogContent>
