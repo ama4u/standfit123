@@ -408,12 +408,11 @@ export default function CartDrawer() {
               Cancel
             </Button>
             <Button 
-              onClick={handlePlaceOrder} 
+              onClick={handleWhatsAppCheckout} 
               disabled={placeOrderMutation.isPending}
-              variant="outline"
-              className="border-2 border-blue-300"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
             >
-              {placeOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
+              Place Order
             </Button>
             <Button 
               onClick={handleWhatsAppCheckout}
