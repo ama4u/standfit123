@@ -466,7 +466,7 @@ export class DatabaseStorage implements IStorage {
     
     return result.map(row => ({
       ...row,
-      category: row.category.id ? row.category : null
+      category: row.category && row.category.id ? row.category : null
     }));
   }
 
@@ -503,7 +503,7 @@ export class DatabaseStorage implements IStorage {
     
     return result.map(row => ({
       ...row,
-      category: row.category.id ? row.category : null
+      category: row.category && row.category.id ? row.category : null
     }));
   }
 
@@ -540,7 +540,7 @@ export class DatabaseStorage implements IStorage {
     
     return result.map(row => ({
       ...row,
-      category: row.category.id ? row.category : null
+      category: row.category && row.category.id ? row.category : null
     }));
   }
 
@@ -579,7 +579,7 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       ...row,
-      category: row.category.id ? row.category : null
+      category: row.category && row.category.id ? row.category : null
     };
   }
 

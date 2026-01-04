@@ -63,22 +63,22 @@ async function seedDatabase() {
 
       const productData = [
         // Rice products
-        { name: "Premium Thai Rice", description: "Long grain fragrant rice", price: 45000, wholesalePrice: 42000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: true, isLocallyMade: false },
-        { name: "Nigerian Ofada Rice", description: "Locally grown brown rice", price: 38000, wholesalePrice: 35000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: true, isLocallyMade: true },
-        { name: "Basmati Rice", description: "Premium quality basmati rice", price: 52000, wholesalePrice: 48000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: false, isLocallyMade: false },
+        { name: "Premium Thai Rice", description: "Long grain fragrant rice", price: 45000, wholesalePrice: 42000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: true, isLocallyMade: false, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767524997/standfit-images/standfit-images/rice-premium-thai.png" },
+        { name: "Nigerian Ofada Rice", description: "Locally grown brown rice", price: 38000, wholesalePrice: 35000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: true, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525000/standfit-images/standfit-images/rice-ofada-nigerian.png" },
+        { name: "Basmati Rice", description: "Premium quality basmati rice", price: 52000, wholesalePrice: 48000, unit: "per 50kg bag", categoryId: riceCategory?.id, inStock: true, featured: false, isLocallyMade: false, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525002/standfit-images/standfit-images/rice-basmati.png" },
         
         // Beans products
-        { name: "Brown Beans", description: "Quality honey beans", price: 32000, wholesalePrice: 29000, unit: "per 50kg bag", categoryId: beansCategory?.id, inStock: true, featured: true, isLocallyMade: true },
-        { name: "White Beans", description: "Premium white beans", price: 35000, wholesalePrice: 32000, unit: "per 50kg bag", categoryId: beansCategory?.id, inStock: true, featured: false, isLocallyMade: true },
+        { name: "Brown Beans", description: "Quality honey beans", price: 32000, wholesalePrice: 29000, unit: "per 50kg bag", categoryId: beansCategory?.id, inStock: true, featured: true, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525005/standfit-images/standfit-images/beans-brown.png" },
+        { name: "White Beans", description: "Premium white beans", price: 35000, wholesalePrice: 32000, unit: "per 50kg bag", categoryId: beansCategory?.id, inStock: true, featured: false, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525007/standfit-images/standfit-images/beans-white.png" },
         
         // Oils products
-        { name: "Palm Oil (25 Liters)", description: "Pure red palm oil", price: 45000, wholesalePrice: 42000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: true, isLocallyMade: true },
-        { name: "Groundnut Oil (25 Liters)", description: "Pure groundnut cooking oil", price: 52000, wholesalePrice: 48000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: false, isLocallyMade: true },
-        { name: "Vegetable Oil (25 Liters)", description: "Refined vegetable oil", price: 48000, wholesalePrice: 45000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: true, isLocallyMade: false },
+        { name: "Palm Oil (25 Liters)", description: "Pure red palm oil", price: 45000, wholesalePrice: 42000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: true, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525010/standfit-images/standfit-images/oil-palm.png" },
+        { name: "Groundnut Oil (25 Liters)", description: "Pure groundnut cooking oil", price: 52000, wholesalePrice: 48000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: false, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525013/standfit-images/standfit-images/oil-groundnut.png" },
+        { name: "Vegetable Oil (25 Liters)", description: "Refined vegetable oil", price: 48000, wholesalePrice: 45000, unit: "per 25L container", categoryId: oilsCategory?.id, inStock: true, featured: true, isLocallyMade: false, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525015/standfit-images/standfit-images/oil-vegetable.png" },
         
         // Spices products
-        { name: "Curry Powder (1kg)", description: "Blended curry spice", price: 3500, wholesalePrice: 3200, unit: "per kg", categoryId: spicesCategory?.id, inStock: true, featured: false, isLocallyMade: false },
-        { name: "Ground Pepper (1kg)", description: "Hot pepper powder", price: 4500, wholesalePrice: 4200, unit: "per kg", categoryId: spicesCategory?.id, inStock: true, featured: false, isLocallyMade: true },
+        { name: "Curry Powder (1kg)", description: "Blended curry spice", price: 3500, wholesalePrice: 3200, unit: "per kg", categoryId: spicesCategory?.id, inStock: true, featured: false, isLocallyMade: false, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525018/standfit-images/standfit-images/spice-curry.png" },
+        { name: "Ground Pepper (1kg)", description: "Hot pepper powder", price: 4500, wholesalePrice: 4200, unit: "per kg", categoryId: spicesCategory?.id, inStock: true, featured: false, isLocallyMade: true, imageUrl: "https://res.cloudinary.com/dih456opf/image/upload/v1767525020/standfit-images/standfit-images/spice-pepper.png" },
       ];
 
       for (const prod of productData) {
