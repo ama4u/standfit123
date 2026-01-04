@@ -77,12 +77,19 @@ export default function NewsFlash() {
                         </div>
                       </div>
                     ) : it.mediaType === 'video' ? (
-                      <video 
-                        src={it.url} 
-                        className="w-full h-60 object-cover"
-                        poster={it.url.replace('.mp4', '-poster.jpg')}
-                        onClick={(e) => e.stopPropagation()}
-                      />
+                      <div className="relative w-full h-60 bg-black flex items-center justify-center group">
+                        <video 
+                          src={it.url} 
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                          muted
+                        />
+                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                          <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <div className="w-0 h-0 border-l-[16px] border-l-red-500 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <img 
                         src={it.url} 
@@ -184,12 +191,15 @@ export default function NewsFlash() {
                   </p>
                 </div>
               ) : selectedItem.mediaType === 'video' ? (
-                <video 
-                  src={selectedItem.url} 
-                  controls 
-                  className="w-full max-h-[60vh] object-contain rounded-lg"
-                  autoPlay
-                />
+                <div className="relative">
+                  <video 
+                    src={selectedItem.url} 
+                    controls 
+                    className="w-full max-h-[60vh] object-contain rounded-lg bg-black"
+                    autoPlay
+                    preload="metadata"
+                  />
+                </div>
               ) : (
                 <img 
                   src={selectedItem.url} 
