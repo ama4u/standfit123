@@ -435,20 +435,152 @@ export class DatabaseStorage implements IStorage {
 
   // Product operations
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).orderBy(desc(products.createdAt));
+    const result = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        price: products.price,
+        wholesalePrice: products.wholesalePrice,
+        unit: products.unit,
+        minOrderQuantity: products.minOrderQuantity,
+        packageSize: products.packageSize,
+        packageUnit: products.packageUnit,
+        categoryId: products.categoryId,
+        imageUrl: products.imageUrl,
+        isLocallyMade: products.isLocallyMade,
+        inStock: products.inStock,
+        featured: products.featured,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          slug: categories.slug
+        }
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .orderBy(desc(products.createdAt));
+    
+    return result.map(row => ({
+      ...row,
+      category: row.category.id ? row.category : null
+    }));
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.categoryId, categoryId));
+    const result = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        price: products.price,
+        wholesalePrice: products.wholesalePrice,
+        unit: products.unit,
+        minOrderQuantity: products.minOrderQuantity,
+        packageSize: products.packageSize,
+        packageUnit: products.packageUnit,
+        categoryId: products.categoryId,
+        imageUrl: products.imageUrl,
+        isLocallyMade: products.isLocallyMade,
+        inStock: products.inStock,
+        featured: products.featured,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          slug: categories.slug
+        }
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.categoryId, categoryId))
+      .orderBy(desc(products.createdAt));
+    
+    return result.map(row => ({
+      ...row,
+      category: row.category.id ? row.category : null
+    }));
   }
 
   async getFeaturedProducts(): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.featured, true));
+    const result = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        price: products.price,
+        wholesalePrice: products.wholesalePrice,
+        unit: products.unit,
+        minOrderQuantity: products.minOrderQuantity,
+        packageSize: products.packageSize,
+        packageUnit: products.packageUnit,
+        categoryId: products.categoryId,
+        imageUrl: products.imageUrl,
+        isLocallyMade: products.isLocallyMade,
+        inStock: products.inStock,
+        featured: products.featured,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          slug: categories.slug
+        }
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.featured, true))
+      .orderBy(desc(products.createdAt));
+    
+    return result.map(row => ({
+      ...row,
+      category: row.category.id ? row.category : null
+    }));
   }
 
   async getProduct(id: string): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product;
+    const result = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        description: products.description,
+        price: products.price,
+        wholesalePrice: products.wholesalePrice,
+        unit: products.unit,
+        minOrderQuantity: products.minOrderQuantity,
+        packageSize: products.packageSize,
+        packageUnit: products.packageUnit,
+        categoryId: products.categoryId,
+        imageUrl: products.imageUrl,
+        isLocallyMade: products.isLocallyMade,
+        inStock: products.inStock,
+        featured: products.featured,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          description: categories.description,
+          slug: categories.slug
+        }
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.id, id));
+    
+    if (result.length === 0) return undefined;
+    
+    const row = result[0];
+    return {
+      ...row,
+      category: row.category.id ? row.category : null
+    };
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
