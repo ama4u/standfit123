@@ -57,7 +57,7 @@ export default function AdminNewsFlash() {
           title: payload.title,
           url: null, // No URL for text-only
           mediaType: 'text',
-          message: payload.message
+          content: payload.message // Use 'content' to match schema
         }),
       });
       if (!res.ok) throw new Error("Failed to create text news item");
