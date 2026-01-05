@@ -87,9 +87,12 @@ export default function AdminOrders() {
   const filteredOrders = orders?.filter((order: any) => {
     const matchesSearch = 
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // Handle both user orders and guest orders
       order.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     
@@ -294,14 +297,22 @@ export default function AdminOrders() {
                         <Avatar className="w-8 h-8">
                           <AvatarImage src={order.user?.profileImageUrl} />
                           <AvatarFallback className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 text-xs">
-                            {order.user?.firstName?.[0]}{order.user?.lastName?.[0]}
+                            {/* Handle both user orders and guest orders */}
+                            {order.user?.firstName?.[0] || order.customerName?.[0] || 'G'}
+                            {order.user?.lastName?.[0] || order.customerName?.split(' ')[1]?.[0] || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium text-gray-900 text-sm">
-                            {order.user?.firstName} {order.user?.lastName}
+                            {/* Display user name or customer name */}
+                            {order.user ? 
+                              `${order.user.firstName} ${order.user.lastName}` : 
+                              order.customerName || 'Guest Customer'
+                            }
                           </p>
-                          <p className="text-xs text-gray-500">{order.user?.email}</p>
+                          <p className="text-xs text-gray-500">
+                            {order.user?.email || order.customerEmail || 'No email'}
+                          </p>
                         </div>
                       </div>
                     </TableCell>
