@@ -17,7 +17,7 @@ async function testDeleteError() {
   try {
     console.log('🧪 Testing product deletion logic...');
     
-    const productId = '206906a1-5265-4648-9cd5-35a60b6b0d6f';
+    const productId = 'e5f0b9d2-cd53-4b02-a342-2227ae80857d';
     console.log(`🎯 Testing product: ${productId}`);
     
     // Test the exact query that should be running
