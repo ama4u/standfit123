@@ -35,34 +35,45 @@ async function cleanSampleOrders() {
     // Delete sample orders (the ones with generic names like "John Doe", "Jane Smith", etc.)
     const sampleNames = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Brown'];
     
-    console.log('🗑️ Deleting sample orders...');
+    console.log('🗑️ Deleting sample orders and their items...');
     
     for (const name of sampleNames) {
-      const deleted = await sql`
-        DELETE FROM orders 
+      // First get the order IDs
+      const ordersToDelete = await sql`
+        SELECT id, customer_name, total_amount
+        FROM orders 
         WHERE customer_name = ${name}
-        RETURNING id, customer_name, total_amount
       `;
       
-      if (deleted.length > 0) {
-        deleted.forEach(order => {
-          console.log(`   ✅ Deleted: ${order.customer_name} - ₦${order.total_amount} (ID: ${order.id.slice(0, 8)})`);
-        });
+      for (const order of ordersToDelete) {
+        // Delete order items first
+        await sql`DELETE FROM order_items WHERE order_id = ${order.id}`;
+        
+        // Then delete the order
+        await sql`DELETE FROM orders WHERE id = ${order.id}`;
+        
+        console.log(`   ✅ Deleted: ${order.customer_name} - ₦${order.total_amount} (ID: ${order.id.slice(0, 8)})`);
       }
     }
     
     // Also delete the test orders I created
-    const testDeleted = await sql`
-      DELETE FROM orders 
+    const testOrders = await sql`
+      SELECT id, customer_name, total_amount
+      FROM orders 
       WHERE customer_name LIKE '%Test%' OR customer_email LIKE '%test%' OR customer_email LIKE '%example.com'
-      RETURNING id, customer_name, total_amount
     `;
     
-    if (testDeleted.length > 0) {
-      console.log('🧪 Deleted test orders:');
-      testDeleted.forEach(order => {
+    if (testOrders.length > 0) {
+      console.log('🧪 Deleting test orders:');
+      for (const order of testOrders) {
+        // Delete order items first
+        await sql`DELETE FROM order_items WHERE order_id = ${order.id}`;
+        
+        // Then delete the order
+        await sql`DELETE FROM orders WHERE id = ${order.id}`;
+        
         console.log(`   ✅ Deleted: ${order.customer_name} - ₦${order.total_amount} (ID: ${order.id.slice(0, 8)})`);
-      });
+      }
     }
     
     console.log('');
