@@ -452,22 +452,29 @@ export class PostgreSQLStorage implements IStorage {
 
   async deleteProduct(id: string): Promise<void> {
     try {
-      // Check if product has order references
-      const orderItemsWithProduct = await db
-        .select({ count: sql<number>`count(*)` })
+      // Simple approach: try to get order items for this product
+      const relatedOrderItems = await db
+        .select()
         .from(orderItems)
-        .where(eq(orderItems.productId, id));
+        .where(eq(orderItems.productId, id))
+        .limit(1); // We only need to know if any exist
       
-      const count = orderItemsWithProduct[0]?.count || 0;
-      
-      if (count > 0) {
+      if (relatedOrderItems.length > 0) {
+        // Get the actual count for the error message
+        const countResult = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(orderItems)
+          .where(eq(orderItems.productId, id));
+        
+        const count = countResult[0]?.count || relatedOrderItems.length;
         throw new Error(`Cannot delete product: it is referenced in ${count} order(s). Consider marking it as inactive instead.`);
       }
       
-      // Delete the product
+      // If no order items found, safe to delete
       await db.delete(products).where(eq(products.id, id));
     } catch (error) {
-      // Re-throw the error to be handled by the route
+      // Log the error for debugging
+      console.error('Product deletion error:', error);
       throw error;
     }
   }
