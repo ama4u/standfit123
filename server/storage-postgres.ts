@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db } from "./db-postgres";
 import {
@@ -451,14 +451,25 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async deleteProduct(id: string): Promise<void> {
-    // Check if product has order references
-    const orderItemsCount = await db.select().from(orderItems).where(eq(orderItems.productId, id));
-    
-    if (orderItemsCount.length > 0) {
-      throw new Error(`Cannot delete product: it is referenced in ${orderItemsCount.length} order(s). Consider marking it as inactive instead.`);
+    try {
+      // Check if product has order references
+      const orderItemsWithProduct = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(orderItems)
+        .where(eq(orderItems.productId, id));
+      
+      const count = orderItemsWithProduct[0]?.count || 0;
+      
+      if (count > 0) {
+        throw new Error(`Cannot delete product: it is referenced in ${count} order(s). Consider marking it as inactive instead.`);
+      }
+      
+      // Delete the product
+      await db.delete(products).where(eq(products.id, id));
+    } catch (error) {
+      // Re-throw the error to be handled by the route
+      throw error;
     }
-    
-    await db.delete(products).where(eq(products.id, id));
   }
 
   // Weekly deals operations
