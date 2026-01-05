@@ -381,15 +381,16 @@ export default function CartDrawer() {
 
       {/* Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="sm:max-w-[500px] border-4 border-blue-600">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] border-4 border-blue-600 flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-blue-600">Checkout</DialogTitle>
             <DialogDescription>
               Complete your order details to proceed
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <ScrollArea className="flex-1 max-h-[60vh] pr-4">
+            <div className="space-y-4 py-4">
             <div className="space-y-4 border-b pb-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-sm text-blue-600">Customer Information</h3>
@@ -493,51 +494,56 @@ export default function CartDrawer() {
               />
             </div>
 
-            <div className="border-t pt-4">
-              <div className="flex justify-between items-center text-lg font-semibold">
-                <span>Total Amount:</span>
-                <span className="text-blue-600">{formatPrice(getTotalPrice())}</span>
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center text-lg font-semibold">
+                  <span>Total Amount:</span>
+                  <span className="text-blue-600">{formatPrice(getTotalPrice())}</span>
+                </div>
               </div>
             </div>
-          </div>
+          </ScrollArea>
 
-          <DialogFooter className="flex-col space-y-2">
+          <DialogFooter className="flex-col space-y-2 flex-shrink-0 border-t pt-4">
             <div className="text-sm text-muted-foreground text-center mb-2">
               Choose how you'd like to place your order:
             </div>
             
-            <Button 
-              onClick={handlePlaceOrder} 
-              disabled={placeOrderMutation.isPending}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
-            >
-              {placeOrderMutation.isPending ? 'Saving Order...' : 'Save Order & Send WhatsApp'}
-            </Button>
-            <div className="text-xs text-center text-muted-foreground">
-              Saves to our system for tracking + sends WhatsApp message
+            <div className="grid grid-cols-1 gap-2 w-full">
+              <Button 
+                onClick={handlePlaceOrder} 
+                disabled={placeOrderMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
+                size="sm"
+              >
+                {placeOrderMutation.isPending ? 'Saving Order...' : 'Save Order & Send WhatsApp'}
+              </Button>
+              <div className="text-xs text-center text-muted-foreground -mt-1">
+                Saves to our system for tracking + sends WhatsApp message
+              </div>
+              
+              <Button 
+                onClick={handleQuickOrder}
+                variant="outline"
+                className="w-full border-2 border-green-300 text-green-600 hover:bg-green-50"
+                size="sm"
+              >
+                Quick Order (WhatsApp Only)
+              </Button>
+              <div className="text-xs text-center text-muted-foreground -mt-1">
+                Just sends WhatsApp message (no customer info required)
+              </div>
+              
+              <Button variant="outline" onClick={() => {
+                setShowCheckout(false);
+                setCustomerName('');
+                setCustomerEmail('');
+                setCustomerPhone('');
+                setShippingAddress('');
+                setNotes('');
+              }} className="w-full border-2 border-gray-300" size="sm">
+                Cancel
+              </Button>
             </div>
-            
-            <Button 
-              onClick={handleQuickOrder}
-              variant="outline"
-              className="w-full border-2 border-green-300 text-green-600 hover:bg-green-50"
-            >
-              Quick Order (WhatsApp Only)
-            </Button>
-            <div className="text-xs text-center text-muted-foreground">
-              Just sends WhatsApp message (no customer info required)
-            </div>
-            
-            <Button variant="outline" onClick={() => {
-              setShowCheckout(false);
-              setCustomerName('');
-              setCustomerEmail('');
-              setCustomerPhone('');
-              setShippingAddress('');
-              setNotes('');
-            }} className="w-full border-2 border-gray-300 mt-2">
-              Cancel
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
