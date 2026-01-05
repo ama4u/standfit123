@@ -99,7 +99,7 @@ export default function CartDrawer() {
     if (!customerName.trim()) {
       toast({
         title: "Name Required",
-        description: "Please enter your full name",
+        description: "Please enter your full name to save order to database",
         variant: "destructive",
       });
       return;
@@ -107,8 +107,8 @@ export default function CartDrawer() {
 
     if (!customerEmail.trim()) {
       toast({
-        title: "Email Required",
-        description: "Please enter your email address",
+        title: "Email Required", 
+        description: "Please enter your email address to save order to database",
         variant: "destructive",
       });
       return;
@@ -117,7 +117,7 @@ export default function CartDrawer() {
     if (!customerPhone.trim()) {
       toast({
         title: "Phone Required",
-        description: "Please enter your phone number",
+        description: "Please enter your phone number to save order to database",
         variant: "destructive",
       });
       return;
@@ -150,6 +150,20 @@ export default function CartDrawer() {
     placeOrderMutation.mutate(orderData);
     
     // Also send via WhatsApp for communication
+    handleWhatsAppCheckout();
+  };
+
+  const handleQuickOrder = () => {
+    // Quick order - just WhatsApp, no database save, no customer info required
+    if (fulfillmentMethod === 'delivery' && !shippingAddress.trim()) {
+      toast({
+        title: "Address Required",
+        description: "Please enter a shipping address for delivery",
+        variant: "destructive",
+      });
+      return;
+    }
+
     handleWhatsAppCheckout();
   };
 
@@ -377,7 +391,10 @@ export default function CartDrawer() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-4 border-b pb-4">
-              <h3 className="font-semibold text-sm text-blue-600">Customer Information</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-blue-600">Customer Information</h3>
+                <span className="text-xs text-muted-foreground">(Required for order tracking)</span>
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="customerName">Full Name *</Label>
@@ -408,6 +425,11 @@ export default function CartDrawer() {
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                 />
+              </div>
+              
+              <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
+                💡 Fill this info to save your order for tracking and analytics. 
+                Or use "Quick Order" below to skip this step.
               </div>
             </div>
 
@@ -479,7 +501,33 @@ export default function CartDrawer() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col space-y-2">
+            <div className="text-sm text-muted-foreground text-center mb-2">
+              Choose how you'd like to place your order:
+            </div>
+            
+            <Button 
+              onClick={handlePlaceOrder} 
+              disabled={placeOrderMutation.isPending}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
+            >
+              {placeOrderMutation.isPending ? 'Saving Order...' : 'Save Order & Send WhatsApp'}
+            </Button>
+            <div className="text-xs text-center text-muted-foreground">
+              Saves to our system for tracking + sends WhatsApp message
+            </div>
+            
+            <Button 
+              onClick={handleQuickOrder}
+              variant="outline"
+              className="w-full border-2 border-green-300 text-green-600 hover:bg-green-50"
+            >
+              Quick Order (WhatsApp Only)
+            </Button>
+            <div className="text-xs text-center text-muted-foreground">
+              Just sends WhatsApp message (no customer info required)
+            </div>
+            
             <Button variant="outline" onClick={() => {
               setShowCheckout(false);
               setCustomerName('');
@@ -487,22 +535,8 @@ export default function CartDrawer() {
               setCustomerPhone('');
               setShippingAddress('');
               setNotes('');
-            }} className="border-2 border-gray-300">
+            }} className="w-full border-2 border-gray-300 mt-2">
               Cancel
-            </Button>
-            <Button 
-              onClick={handlePlaceOrder} 
-              disabled={placeOrderMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500"
-            >
-              {placeOrderMutation.isPending ? 'Placing Order...' : 'Place Order'}
-            </Button>
-            <Button 
-              onClick={handleWhatsAppCheckout}
-              variant="outline"
-              className="border-2 border-green-300 text-green-600 hover:bg-green-50"
-            >
-              WhatsApp Only
             </Button>
           </DialogFooter>
         </DialogContent>
