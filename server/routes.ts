@@ -586,7 +586,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteProduct(id);
       res.json({ message: "Product deleted successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      // If it's a business logic error (like foreign key constraint), send 400
+      // If it's a system error, send 500
+      if (error.message && error.message.includes("Cannot delete product")) {
+        res.status(400).json({ message: error.message });
+      } else {
+        console.error("Unexpected product deletion error:", error);
+        res.status(500).json({ message: error.message || "Failed to delete product" });
+      }
     }
   });
 
