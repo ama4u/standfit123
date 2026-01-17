@@ -14,10 +14,20 @@ export default function Products() {
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<any[]>({
     queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const res = await fetch('/api/categories');
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      return res.json();
+    },
   });
 
   const { data: products, isLoading: productsLoading } = useQuery<any[]>({
     queryKey: ["/api/products"],
+    queryFn: async () => {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      return res.json();
+    },
   });
 
   const filteredProducts = products?.filter((product: any) => {
