@@ -75,13 +75,13 @@ export default function Home() {
       <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16 sm:py-20 lg:py-24" data-testid="hero-section">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Hero Content */}
-            <div className="text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6" data-testid="hero-title">
+            <div className="text-center lg:text-left order-2 lg:order-1">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-foreground leading-tight mb-6" data-testid="hero-title">
                 Leading Wholesale Distributor & <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">Food Retail Store</span> in Abuja
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8" data-testid="hero-description">
+              <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8" data-testid="hero-description">
                 Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
               </p>
 
@@ -121,7 +121,7 @@ export default function Home() {
             </div>
 
             {/* Hero Carousel */}
-            <div className="relative">
+            <div className="relative order-1 lg:order-2">
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-2xl blur-xl"></div>
               <div className="relative">
                 <HeroCarousel />

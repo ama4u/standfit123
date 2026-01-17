@@ -216,6 +216,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(blogPosts);
   });
 
+  // News flash items
+  app.get("/api/newsflash", async (_req, res) => {
+    try {
+      const newsFlashItems = await storage.getNewsFlashItems();
+      res.json(newsFlashItems);
+    } catch (error: any) {
+      console.error("Error fetching news flash items:", error);
+      res.status(503).json({ 
+        message: "Service temporarily unavailable", 
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
+  });
+
   // Use slug for blog post details
   app.get("/api/blog-posts/:slug", async (req, res) => {
     const slug = req.params.slug;
