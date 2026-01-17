@@ -263,60 +263,7 @@ export class PostgreSQLStorage implements IStorage {
 
   // Product operations
   async getProducts(): Promise<Product[]> {
-    const result = await db
-      .select({
-        id: products.id,
-        name: products.name,
-        slug: products.slug,
-        description: products.description,
-        price: products.price,
-        wholesalePrice: products.wholesalePrice,
-        unit: products.unit,
-        minOrderQuantity: products.minOrderQuantity,
-        packageSize: products.packageSize,
-        packageUnit: products.packageUnit,
-        categoryId: products.categoryId,
-        imageUrl: products.imageUrl,
-        isLocallyMade: products.isLocallyMade,
-        inStock: products.inStock,
-        featured: products.featured,
-        createdAt: products.createdAt,
-        updatedAt: products.updatedAt,
-        categoryName: categories.name,
-        categoryDescription: categories.description,
-        categorySlug: categories.slug
-      })
-      .from(products)
-      .leftJoin(categories, eq(products.categoryId, categories.id))
-      .orderBy(desc(products.createdAt));
-    
-    return result.map(row => ({
-      id: row.id,
-      name: row.name,
-      slug: (row as any).slug,
-      description: row.description,
-      price: row.price,
-      wholesalePrice: row.wholesalePrice,
-      unit: row.unit,
-      minOrderQuantity: row.minOrderQuantity,
-      packageSize: row.packageSize,
-      packageUnit: row.packageUnit,
-      categoryId: row.categoryId,
-      imageUrl: row.imageUrl,
-      isLocallyMade: row.isLocallyMade,
-      inStock: row.inStock,
-      featured: row.featured,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      category: row.categoryName ? {
-        id: row.categoryId!,
-        name: row.categoryName,
-        description: row.categoryDescription,
-        slug: row.categorySlug!,
-        createdAt: null,
-        updatedAt: null
-      } : null
-    }));
+    return await db.select().from(products).orderBy(desc(products.createdAt));
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
