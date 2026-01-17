@@ -6,6 +6,7 @@ import WeeklyDeals from "@/components/weekly-deals";
 import HeroCarousel from "@/components/hero-carousel";
 import SocialImpactCarousel from "@/components/social-impact-carousel";
 import { Link } from "wouter";
+import ProductCard from "@/components/product-card";
 import { 
   Store, 
   ShoppingCart, 
@@ -41,6 +42,15 @@ export default function Home() {
   // Fetch latest news flash items
   const { data: newsFlashItems, isLoading: newsFlashLoading } = useQuery<any[]>({
     queryKey: ["/api/newsflash"],
+  });
+
+  const { data: products, isLoading: productsLoading } = useQuery<any[]>({
+    queryKey: ["/api/products"],
+    queryFn: async () => {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      return res.json();
+    },
   });
 
   const categoryIcons = {
@@ -260,6 +270,48 @@ export default function Home() {
 
       {/* Weekly Deals */}
       <WeeklyDeals />
+
+      {/* Featured Products Preview */}
+      <section className="py-16" data-testid="featured-products-section">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-foreground">Featured Products</h2>
+              <p className="text-muted-foreground">A selection of our popular products. Click more to view the full catalog.</p>
+            </div>
+            <div>
+              <Link href="/products">
+                <Button className="bg-gradient-to-r from-primary to-secondary text-white">
+                  View All Products
+                  <span className="sr-only"> - go to products page</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {productsLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="w-full h-48" />
+                  <CardContent className="p-4 space-y-4">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-10 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products?.slice(0, 8).map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Why Choose Us */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-secondary/5" data-testid="why-choose-us-section">
