@@ -178,6 +178,47 @@ export class PostgreSQLStorage implements IStorage {
     await db.delete(users).where(eq(users.id, id));
   }
 
+  // Password reset operations
+  async setPasswordResetToken(email: string, token: string, expiry: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        resetPasswordToken: token, 
+        resetPasswordExpires: expiry,
+        updatedAt: new Date()
+      })
+      .where(eq(users.email, email));
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.resetPasswordToken, token));
+    return user;
+  }
+
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        password: hashedPassword,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, id));
+  }
+
+  async clearPasswordResetToken(id: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        resetPasswordToken: null, 
+        resetPasswordExpires: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, id));
+  }
+
   // Category operations
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories).orderBy(categories.name);
@@ -674,18 +715,34 @@ export class PostgreSQLStorage implements IStorage {
 
   // Reports
   async getReports(): Promise<any> {
-    const totalOrders = await db.select().from(orders);
-    const totalSales = totalOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-    const totalProducts = await db.select().from(products);
-    const totalUsers = await db.select().from(users);
+    try {
+      // Use SQL aggregation instead of loading all data into memory
+      const [salesResult, ordersCount, productsCount, usersCount, recentOrders] = await Promise.all([
+        // Get total sales using SQL SUM
+        db.select({ 
+          totalSales: sql<number>`COALESCE(SUM(${orders.totalAmount}), 0)` 
+        }).from(orders),
+        
+        // Get counts using SQL COUNT
+        db.select({ count: sql<number>`count(*)` }).from(orders),
+        db.select({ count: sql<number>`count(*)` }).from(products),
+        db.select({ count: sql<number>`count(*)` }).from(users),
+        
+        // Get recent orders with limit
+        db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5)
+      ]);
 
-    return {
-      totalSales,
-      totalOrders: totalOrders.length,
-      totalProducts: totalProducts.length,
-      totalUsers: totalUsers.length,
-      recentOrders: totalOrders.slice(0, 5),
-    };
+      return {
+        totalSales: salesResult[0]?.totalSales || 0,
+        totalOrders: ordersCount[0]?.count || 0,
+        totalProducts: productsCount[0]?.count || 0,
+        totalUsers: usersCount[0]?.count || 0,
+        recentOrders: recentOrders,
+      };
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      throw new Error('Failed to fetch reports data');
+    }
   }
 }
 

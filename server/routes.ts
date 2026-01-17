@@ -14,6 +14,27 @@ import { gzipSync } from 'zlib';
 
 // Single consolidated route registrar
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get("/api/health", async (_req, res) => {
+    try {
+      // Test database connection
+      await storage.getCategories();
+      res.json({ 
+        status: "healthy", 
+        timestamp: new Date().toISOString(),
+        database: "connected"
+      });
+    } catch (error: any) {
+      console.error("Health check failed:", error);
+      res.status(503).json({ 
+        status: "unhealthy", 
+        timestamp: new Date().toISOString(),
+        database: "disconnected",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
   // Set up local image upload handling
   const uploadDir = path.resolve(process.cwd(), "uploads");
   if (!fs.existsSync(uploadDir)) {
@@ -147,23 +168,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/products", async (req, res) => {
-    const categoryId = req.query.categoryId as string | undefined;
-    const products = categoryId
-      ? await storage.getProductsByCategory(categoryId)
-      : await storage.getProducts();
-    res.json(products);
+    try {
+      const categoryId = req.query.categoryId as string | undefined;
+      const products = categoryId
+        ? await storage.getProductsByCategory(categoryId)
+        : await storage.getProducts();
+      res.json(products);
+    } catch (error: any) {
+      console.error("Error fetching products:", error);
+      res.status(503).json({ 
+        message: "Service temporarily unavailable", 
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
   });
 
   app.get("/api/products/:id", async (req, res) => {
-    const id = req.params.id;
-    const product = await storage.getProduct(id);
-    if (!product) return res.status(404).send("Product not found");
-    res.json(product);
+    try {
+      const id = req.params.id;
+      const product = await storage.getProduct(id);
+      if (!product) return res.status(404).send("Product not found");
+      res.json(product);
+    } catch (error: any) {
+      console.error("Error fetching product:", error);
+      res.status(503).json({ 
+        message: "Service temporarily unavailable", 
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
   });
 
   app.get("/api/weekly-deals", async (_req, res) => {
-    const weeklyDeals = await storage.getActiveWeeklyDeals();
-    res.json(weeklyDeals);
+    try {
+      const weeklyDeals = await storage.getActiveWeeklyDeals();
+      res.json(weeklyDeals);
+    } catch (error: any) {
+      console.error("Error fetching weekly deals:", error);
+      res.status(503).json({ 
+        message: "Service temporarily unavailable", 
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
   });
 
   app.get("/api/blog-posts", async (_req, res) => {
@@ -318,56 +363,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Admin login error:", error);
       res.status(500).json({ message: error.message });
     }
-  });
-
-  // Admin Session Status
-  app.get("/api/auth/admin/status", async (req, res) => {
-    try {
-      if (!req.session?.adminId) {
-        return res.status(401).json({ 
-          authenticated: false, 
-          message: "No admin session",
-          sessionId: req.sessionID
-        });
-      }
-      
-      const admin = await storage.getAdminUserById(req.session.adminId);
-      if (!admin) {
-        req.session.adminId = undefined;
-        return res.status(401).json({ 
-          authenticated: false, 
-          message: "Admin not found",
-          sessionId: req.sessionID
-        });
-      }
-      
-      res.json({ 
-        authenticated: true,
-        admin: {
-          id: admin.id,
-          email: admin.email,
-          firstName: admin.firstName,
-          lastName: admin.lastName
-        },
-        sessionId: req.sessionID
-      });
-    } catch (error: any) {
-      console.error("Admin status check error:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Admin Logout
-  app.post("/api/auth/admin/logout", (req, res) => {
-    const sessionId = req.sessionID;
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Admin logout error:", err);
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      console.log(`✅ Admin logout success (Session: ${sessionId})`);
-      res.json({ message: "Logged out successfully" });
-    });
   });
 
   // Admin Session Status
@@ -610,8 +605,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin: Get reports
   app.get("/api/admin/reports", requireAdmin, async (_req, res) => {
-    const reports = await storage.getReports();
-    res.json(reports);
+    try {
+      const reports = await storage.getReports();
+      res.json(reports);
+    } catch (error: any) {
+      console.error("Error fetching admin reports:", error);
+      res.status(503).json({ 
+        message: "Service temporarily unavailable", 
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      });
+    }
   });
 
   // Admin: Send notification
@@ -725,13 +728,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
       for (const prod of products) {
-        const lastmod = prod.updatedAt || prod.createdAt ? new Date(prod.updatedAt || prod.createdAt).toISOString() : new Date().toISOString();
+        const lastmod = prod.updatedAt || prod.createdAt ? new Date(prod.updatedAt || prod.createdAt!).toISOString() : new Date().toISOString();
         // prefer slug if available
         const slugOrId = prod.slug || prod.id;
         xml += `  <url>\n    <loc>${baseUrl}/products/${slugOrId}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
       }
       for (const post of posts) {
-        const lastmod = post.updatedAt || post.publishedAt || post.createdAt ? new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString() : new Date().toISOString();
+        const lastmod = post.updatedAt || post.publishedAt || post.createdAt ? new Date(post.updatedAt || post.publishedAt || post.createdAt!).toISOString() : new Date().toISOString();
         const slug = post.slug || (post.id || '');
         xml += `  <url>\n    <loc>${baseUrl}/blog/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
       }
