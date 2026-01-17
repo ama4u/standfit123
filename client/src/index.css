@@ -192,6 +192,18 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
+/* Ensure outline button text is always visible */
+.hero-outline-button {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.hero-outline-button:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
 :root {
   --background: hsl(60, 9%, 98%);
   --foreground: hsl(24, 10%, 10%);
