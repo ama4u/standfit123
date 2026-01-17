@@ -24,7 +24,11 @@ import {
   Calendar,
   Play,
   Image as ImageIcon,
-  MessageSquare
+  MessageSquare,
+  Star,
+  Shield,
+  Truck,
+  Award
 } from "lucide-react";
 
 export default function Home() {
@@ -62,7 +66,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Seo
         title="Standfit Premium — Leading Wholesale Distributor & Food Retail Store in Abuja"
         description="Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT. Browse rice, noodles, beverages, detergents and more."
@@ -71,63 +75,72 @@ export default function Home() {
         keywords="wholesale food, Nigerian food commodities, rice, noodles, beverages, detergents, Abuja"
       />
 
-      {/* Hero Section with Carousel */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16 sm:py-20 lg:py-24" data-testid="hero-section">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5"></div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white" data-testid="hero-section">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/2 right-0 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        </div>
+        
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[600px] lg:min-h-[700px]">
             {/* Hero Content */}
-            <div className="text-center lg:text-left order-2 lg:order-1">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-foreground leading-tight mb-6" data-testid="hero-title">
-                Leading Wholesale Distributor & <span className="bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">Food Retail Store</span> in Abuja
-              </h1>
-              <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8" data-testid="hero-description">
-                Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
-              </p>
+            <div className="text-center lg:text-left space-y-6 lg:space-y-8 order-2 lg:order-1 animate-fade-in-up">
+              <div className="space-y-4 lg:space-y-6">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                  Leading <span className="bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">Wholesale</span> Distributor in Abuja
+                </h1>
+                <p className="text-base md:text-lg lg:text-xl text-blue-100 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                  Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
+                </p>
+              </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 animate-fade-in-up animate-delay-200">
                 <Link href="/products">
-                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg" data-testid="button-shop-now">
-                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold" data-testid="button-shop-now">
+                    <ShoppingCart className="h-5 w-5 mr-3" />
                     Shop Now
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg" data-testid="button-contact-us">
-                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold" data-testid="button-contact-us">
+                    <Phone className="h-5 w-5 mr-3" />
                     Contact Us
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="w-full sm:w-auto whitespace-nowrap border-2 border-purple-200 hover:bg-purple-50" data-testid="button-order-wholesale">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  Order Wholesale
-                </Button>
               </div>
 
-              <div className="inline-block">
-                <Card className="p-4 sm:p-6 bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                  <div className="grid grid-cols-2 gap-6 text-center">
-                    <div>
-                      <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent" data-testid="stat-sales">77+</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">Products Choice</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent" data-testid="stat-years">7+</div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">Years Serving Abuja</div>
-                    </div>
-                  </div>
-                </Card>
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-6 pt-6 lg:pt-8 animate-fade-in-up animate-delay-300">
+                <div className="text-center lg:text-left">
+                  <div className="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-cyan-200 to-blue-200 bg-clip-text text-transparent" data-testid="stat-products">77+</div>
+                  <div className="text-blue-200 text-sm lg:text-base">Product Varieties</div>
+                </div>
+                <div className="text-center lg:text-left">
+                  <div className="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-cyan-200 to-blue-200 bg-clip-text text-transparent" data-testid="stat-years">7+</div>
+                  <div className="text-blue-200 text-sm lg:text-base">Years of Excellence</div>
+                </div>
               </div>
             </div>
 
             {/* Hero Carousel */}
-            <div className="relative order-1 lg:order-2">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-2xl blur-xl"></div>
-              <div className="relative">
+            <div className="relative order-1 lg:order-2 mb-8 lg:mb-0 animate-fade-in-right animate-delay-100">
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-3xl blur-2xl"></div>
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-3 lg:p-4 border border-white/20 max-w-lg mx-auto lg:max-w-none">
                 <HeroCarousel />
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Wave Separator */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-12 lg:h-20">
+            <path fill="rgb(248 250 252)" d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
+          </svg>
         </div>
       </section>
 
