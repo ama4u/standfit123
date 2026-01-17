@@ -1,10 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
+import fs from "fs";
 import path from "path";
 import session from "express-session";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import fs from 'fs';
 
 const app = express();
 
@@ -157,8 +157,11 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    // Log full error for server-side debugging
+    console.error('Unhandled error in request handler:', err);
+
     res.status(status).json({ message });
-    throw err;
+    // do not rethrow here to prevent the process from exiting on request errors
   });
 
   // importantly only setup vite in development and after
