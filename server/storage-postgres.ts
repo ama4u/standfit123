@@ -94,6 +94,7 @@ export interface IStorage {
   // Order operations
   getOrders(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
   getOrder(id: string): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
+  getOrdersByUser(userId: string): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
   createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   deleteOrder(id: string): Promise<void>;
@@ -565,6 +566,28 @@ export class PostgreSQLStorage implements IStorage {
   // Order operations
   async getOrders(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
     const ordersData = await db.select().from(orders).orderBy(desc(orders.createdAt));
+    
+    return await Promise.all(
+      ordersData.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.id));
+        
+        const itemsWithProducts = await Promise.all(
+          items.map(async (item) => {
+            const [product] = await db.select().from(products).where(eq(products.id, item.productId));
+            return { ...item, product };
+          })
+        );
+
+        return { ...order, items: itemsWithProducts };
+      })
+    );
+  }
+
+  async getOrdersByUser(userId: string): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+    const ordersData = await db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
     
     return await Promise.all(
       ordersData.map(async (order) => {
