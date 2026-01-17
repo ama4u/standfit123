@@ -67,6 +67,7 @@ export const products = sqliteTable("products", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
+  slug: text("slug").notNull().unique(),
   price: real("price").notNull(), // Base retail price per unit
   wholesalePrice: real("wholesale_price"), // Wholesale price per unit
   unit: text("unit").notNull(), // e.g., "per piece", "per kg", "per bag"

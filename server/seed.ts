@@ -184,9 +184,11 @@ async function seedDatabase() {
         try {
           const exists = existingProducts.find((p: any) => (p.name || '').toLowerCase() === (prod.name || '').toLowerCase());
           if (!exists) {
-            await storage.createProduct(prod);
-            createdCount++;
-            console.log(`Created product: ${prod.name}`);
+            // ensure slug is generated for seed products
+            const slug = (prod.name || '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+            await storage.createProduct({ ...prod, slug });
+             createdCount++;
+             console.log(`Created product: ${prod.name}`);
           }
         } catch (err) {
           console.error("Failed to create product", prod.name, err);
