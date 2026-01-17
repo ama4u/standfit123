@@ -10,9 +10,6 @@ import bcrypt from "bcryptjs";
 import { requireAuth, requireAdmin, verifyPassword } from "./auth";
 import { sendPasswordResetEmail } from "./email";
 import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
-import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
 
 // Single consolidated route registrar
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -295,15 +292,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/admin/login", async (req, res) => {
     try {
       const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
       const admin = await storage.getAdminUser(email);
       if (!admin || !(await verifyPassword(password, admin.password))) {
+        console.log(`❌ Admin login failed for email: ${email}`);
         return res.status(401).json({ message: "Invalid credentials" });
       }
+      
       req.session.adminId = admin.id;
-      res.json({ id: admin.id, email: admin.email, firstName: admin.firstName, lastName: admin.lastName });
+      console.log(`✅ Admin login success: ${admin.email} (Session: ${req.sessionID})`);
+      
+      res.json({ 
+        id: admin.id, 
+        email: admin.email, 
+        firstName: admin.firstName, 
+        lastName: admin.lastName,
+        sessionId: req.sessionID
+      });
     } catch (error: any) {
+      console.error("Admin login error:", error);
       res.status(500).json({ message: error.message });
     }
+  });
+
+  // Admin Session Status
+  app.get("/api/auth/admin/status", async (req, res) => {
+    try {
+      if (!req.session?.adminId) {
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: "No admin session",
+          sessionId: req.sessionID
+        });
+      }
+      
+      const admin = await storage.getAdminUserById(req.session.adminId);
+      if (!admin) {
+        req.session.adminId = undefined;
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: "Admin not found",
+          sessionId: req.sessionID
+        });
+      }
+      
+      res.json({ 
+        authenticated: true,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          firstName: admin.firstName,
+          lastName: admin.lastName
+        },
+        sessionId: req.sessionID
+      });
+    } catch (error: any) {
+      console.error("Admin status check error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Admin Logout
+  app.post("/api/auth/admin/logout", (req, res) => {
+    const sessionId = req.sessionID;
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Admin logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      console.log(`✅ Admin logout success (Session: ${sessionId})`);
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  // Admin Session Status
+  app.get("/api/auth/admin/status", async (req, res) => {
+    try {
+      if (!req.session?.adminId) {
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: "No admin session",
+          sessionId: req.sessionID
+        });
+      }
+      
+      const admin = await storage.getAdminUserById(req.session.adminId);
+      if (!admin) {
+        req.session.adminId = undefined;
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: "Admin not found",
+          sessionId: req.sessionID
+        });
+      }
+      
+      res.json({ 
+        authenticated: true,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          firstName: admin.firstName,
+          lastName: admin.lastName
+        },
+        sessionId: req.sessionID
+      });
+    } catch (error: any) {
+      console.error("Admin status check error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Admin Logout
+  app.post("/api/auth/admin/logout", (req, res) => {
+    const sessionId = req.sessionID;
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Admin logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      console.log(`✅ Admin logout success (Session: ${sessionId})`);
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // Forgot Password - Send reset link to email
@@ -449,16 +562,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/orders/:id/status", requireAdmin, async (req, res) => {
     try {
       const id = req.params.id;
-      const { status } = req.body;
-      if (!status || !["pending", "processing", "completed", "cancelled"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
+      const { status } = req.body as { status?: string };
+
+      const validStatuses = ["pending", "processing", "completed", "cancelled"];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status", validStatuses });
       }
-      const order = await storage.updateOrderStatus(id, status);
+
+      const order = await storage.getOrder(id as string);
       if (!order) return res.status(404).json({ message: "Order not found" });
-      await storage.createNotification({ userId: order.userId, title: "Order Update", message: `Your order #${order.id} status has been updated to ${status}`, type: "order_update" });
-      res.json(order);
+
+      const updatedOrder = await storage.updateOrderStatus(id as string, status);
+      if (!updatedOrder) return res.status(500).json({ message: "Failed to update order status" });
+
+      // Try to notify the user (don't fail the request if notification creation fails)
+      try {
+        if ((updatedOrder as any).userId) {
+          await storage.createNotification({
+            userId: (updatedOrder as any).userId,
+            title: "Order Update",
+            message: `Your order #${(updatedOrder as any).id.slice(0, 8)} status is now ${status}`,
+            type: "order_update",
+          });
+        }
+      } catch (notificationError) {
+        console.error("Failed to create notification after order status update:", notificationError);
+      }
+
+      res.json(updatedOrder);
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      console.error("Order status update error:", error);
+      res.status(500).json({ message: error.message || "Failed to update order status" });
     }
   });
 
@@ -482,8 +616,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Send notification
   app.post("/api/admin/notifications", requireAdmin, async (req, res) => {
     try {
-      const { userId, message, type } = req.body;
-      const notification = await storage.createNotification({ userId, title: "Message from Admin", message, type: type || "admin_message" });
+      const { title, message, type } = req.body;
+      const notification = await storage.createNotification({ 
+        userId: null, // Admin notifications don't need a specific user
+        title: title || "Message from Admin", 
+        message, 
+        type: type || "admin_message" 
+      });
       res.json(notification);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -509,11 +648,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: create news flash item
   app.post("/api/admin/newsflash", requireAdmin, async (req, res) => {
     try {
-      const { title, url, mediaType } = req.body;
-      if (!url || !mediaType) return res.status(400).json({ message: "url and mediaType required" });
-      const item = await storage.createNewsFlashItem({ title: title || null, url, mediaType });
-      res.json(item);
+      const { title, url, mediaType, content, message, publicId } = req.body;
+      
+      if (mediaType === 'text') {
+        // Text-only news flash - accept both 'content' and 'message' for backward compatibility
+        const textContent = content || message;
+        if (!textContent) return res.status(400).json({ message: "content required for text posts" });
+        const item = await storage.createNewsFlashItem({ 
+          title: title || "News Update", 
+          url: null, 
+          mediaType: 'text',
+          content: textContent,
+          publicId: null
+        });
+        res.json(item);
+      } else {
+        // Media news flash
+        if (!url || !mediaType) return res.status(400).json({ message: "url and mediaType required for media posts" });
+        const item = await storage.createNewsFlashItem({ 
+          title: title || null, 
+          url, 
+          mediaType,
+          content: null,
+          publicId: publicId || null
+        });
+        res.json(item);
+      }
     } catch (error: any) {
+      console.error("Error creating news flash item:", error);
       res.status(400).json({ message: error.message });
     }
   });
@@ -561,7 +723,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteProduct(id);
       res.json({ message: "Product deleted successfully" });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      // If it's a business logic error (like foreign key constraint), send 400
+      // If it's a system error, send 500
+      if (error.message && error.message.includes("Cannot delete product")) {
+        res.status(400).json({ message: error.message });
+      } else {
+        console.error("Unexpected product deletion error:", error);
+        res.status(500).json({ message: error.message || "Failed to delete product" });
+      }
     }
   });
 
@@ -598,6 +767,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!order) return res.status(404).json({ message: "Order not found" });
     if (order.userId !== userId) return res.status(403).json({ message: "Unauthorized" });
     res.json(order);
+  });
+
+  // Guest: Create order (no authentication required)
+  app.post("/api/guest/orders", async (req, res) => {
+    try {
+      const { items, customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, notes, fulfillmentMethod } = req.body as {
+        items: { productId: string; quantity: number }[];
+        customerName: string;
+        customerEmail: string;
+        customerPhone: string;
+        shippingAddress: string;
+        paymentMethod?: string;
+        notes?: string;
+        fulfillmentMethod?: string;
+      };
+
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Order items are required" });
+      }
+
+      if (!customerName || !customerEmail || !customerPhone) {
+        return res.status(400).json({ message: "Customer name, email, and phone are required" });
+      }
+
+      const resolvedItems = [] as { productId: string; quantity: number; priceAtOrder: number }[];
+      let totalAmount = 0;
+      
+      for (const item of items) {
+        const product = await storage.getProduct(item.productId);
+        if (!product) return res.status(400).json({ message: `Product ${item.productId} not found` });
+        const price = Number(product.price);
+        const subtotal = price * item.quantity;
+        totalAmount += subtotal;
+        resolvedItems.push({ 
+          productId: item.productId, 
+          quantity: item.quantity, 
+          priceAtOrder: price 
+        });
+      }
+
+      const order = await storage.createOrder(
+        {
+          userId: null, // Guest order
+          customerName,
+          customerEmail,
+          customerPhone,
+          totalAmount,
+          status: "pending",
+          shippingAddress: shippingAddress || "",
+          paymentMethod: paymentMethod || "cash_on_delivery",
+          notes: notes || null,
+        },
+        resolvedItems
+      );
+
+      res.json(order);
+    } catch (error: any) {
+      console.error('Guest order creation error:', error);
+      res.status(500).json({ message: error.message });
+    }
   });
 
   // User: Create order
