@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { requireAuth, requireAdmin, verifyPassword } from "./auth";
 import { sendPasswordResetEmail } from "./email";
 import { uploadImage, uploadVideo, uploadMedia, deleteFromCloudinary } from "./cloudinary";
+import { gzipSync } from 'zlib';
 
 // Single consolidated route registrar
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -675,7 +676,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sitemap index and gzipped sitemaps
-  const zlib = require('zlib');
 
   app.get('/sitemap.xml', async (req, res) => {
     try {
@@ -707,7 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xml += `  <url>\n    <loc>${baseUrl}${p.url}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
       }
       xml += '</urlset>';
-      const gz = zlib.gzipSync(xml);
+      const gz = gzipSync(xml);
       res.header('Content-Type', 'application/xml');
       res.header('Content-Encoding', 'gzip');
       res.send(gz);
@@ -736,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xml += `  <url>\n    <loc>${baseUrl}/blog/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
       }
       xml += '</urlset>';
-      const gz = zlib.gzipSync(xml);
+      const gz = gzipSync(xml);
       res.header('Content-Type', 'application/xml');
       res.header('Content-Encoding', 'gzip');
       res.send(gz);
@@ -754,10 +754,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
       const bingPing = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
 
-      const fetch = require('node-fetch');
+      const fetchFn = (globalThis as any).fetch ?? (await import('node-fetch')).default;
       const results = await Promise.allSettled([
-        fetch(googlePing),
-        fetch(bingPing),
+        fetchFn(googlePing),
+        fetchFn(bingPing),
       ]);
 
       res.json({ message: 'Pinged search engines', results: results.map(r => ({ status: r.status })) });
