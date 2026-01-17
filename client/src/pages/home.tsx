@@ -106,7 +106,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl hover:shadow-2xl magnetic-button px-8 py-4 text-lg font-semibold" data-testid="button-contact-us">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white/50 text-white hover:bg-white/20 hover:border-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl magnetic-button px-8 py-4 text-lg font-semibold" data-testid="button-contact-us">
                     <Phone className="h-5 w-5 mr-3" />
                     Contact Us
                   </Button>
