@@ -112,83 +112,98 @@ app.use((req, res, next) => {
   next();
 });
 
+// Global error handlers to surface crashes in Heroku logs
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    const server = await registerRoutes(app);
 
-  // Serve uploaded files statically (both in dev and prod)
-  app.use(
-    "/uploads",
-    express.static(path.resolve(process.cwd(), "uploads"))
-  );
+    // Serve uploaded files statically (both in dev and prod)
+    app.use(
+      "/uploads",
+      express.static(path.resolve(process.cwd(), "uploads"))
+    );
 
-  // Serve the attached_assets folder so client can request images directly
-  app.use(
-    "/attached_assets",
-    express.static(path.resolve(process.cwd(), "attached_assets"))
-  );
+    // Serve the attached_assets folder so client can request images directly
+    app.use(
+      "/attached_assets",
+      express.static(path.resolve(process.cwd(), "attached_assets"))
+    );
 
-  // Serve favicon explicitly to avoid 503 when missing
-  app.get('/favicon.ico', (req, res) => {
-    try {
-      const attachedFav = path.resolve(process.cwd(), 'attached_assets', 'favicon.ico');
-      const distFav = path.resolve(process.cwd(), 'dist', 'public', 'favicon.ico');
-      const logoFallback = path.resolve(process.cwd(), 'dist', 'public', 'assets', 'standfit logo_1756828194925-CfQ7TYBl.jpg');
+    // Serve favicon explicitly to avoid 503 when missing
+    app.get('/favicon.ico', (req, res) => {
+      try {
+        const attachedFav = path.resolve(process.cwd(), 'attached_assets', 'favicon.ico');
+        const distFav = path.resolve(process.cwd(), 'dist', 'public', 'favicon.ico');
+        const logoFallback = path.resolve(process.cwd(), 'dist', 'public', 'assets', 'standfit logo_1756828194925-CfQ7TYBl.jpg');
 
-      if (fs.existsSync(attachedFav)) {
-        return res.sendFile(attachedFav);
+        if (fs.existsSync(attachedFav)) {
+          return res.sendFile(attachedFav);
+        }
+        if (fs.existsSync(distFav)) {
+          return res.sendFile(distFav);
+        }
+        if (fs.existsSync(logoFallback)) {
+          // serve logo as fallback (browsers accept png/jpg as favicon)
+          return res.sendFile(logoFallback);
+        }
+
+        // No favicon available — return 204 No Content so browser stops requesting
+        return res.status(204).end();
+      } catch (err) {
+        // On error, send no content
+        return res.status(204).end();
       }
-      if (fs.existsSync(distFav)) {
-        return res.sendFile(distFav);
-      }
-      if (fs.existsSync(logoFallback)) {
-        // serve logo as fallback (browsers accept png/jpg as favicon)
-        return res.sendFile(logoFallback);
-      }
+    });
 
-      // No favicon available — return 204 No Content so browser stops requesting
-      return res.status(204).end();
-    } catch (err) {
-      // On error, send no content
-      return res.status(204).end();
-    }
-  });
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+      // Log full error for server-side debugging
+      console.error('Unhandled error in request handler:', err);
 
-    // Log full error for server-side debugging
-    console.error('Unhandled error in request handler:', err);
+      res.status(status).json({ message });
+      // do not rethrow here to prevent the process from exiting on request errors
+    });
 
-    res.status(status).json({ message });
-    // do not rethrow here to prevent the process from exiting on request errors
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // Use Heroku's PORT environment variable or fallback to 5000 for local development
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-
-  server.listen(port, () => {
-    log(`🚀 Server running on port ${port}`);
-    log(`📱 Local: http://localhost:${port}`);
-    if (process.env.NODE_ENV === "production") {
-      log(`🌐 Production: https://standfit-e816d09b795a.herokuapp.com`);
-    }
-  }).on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      log(`❌ Port ${port} is already in use!`);
-      log(`💡 Please stop any other processes using port ${port} and try again.`);
-      process.exit(1);
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
     } else {
-      throw err;
+      serveStatic(app);
     }
-  });
+
+    // Use Heroku's PORT environment variable or fallback to 5000 for local development
+    const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+
+    server.listen(port, () => {
+      log(`🚀 Server running on port ${port}`);
+      log(`📱 Local: http://localhost:${port}`);
+      if (process.env.NODE_ENV === "production") {
+        log(`🌐 Production: https://standfit-e816d09b795a.herokuapp.com`);
+      }
+    }).on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        log(`❌ Port ${port} is already in use!`);
+        log(`💡 Please stop any other processes using port ${port} and try again.`);
+        process.exit(1);
+      } else {
+        throw err;
+      }
+    });
+  } catch (e) {
+    console.error('Fatal error during server startup:', e);
+    // Rethrow so Heroku clearly marks the process as crashed — the global handlers will log details
+    throw e;
+  }
 })();
