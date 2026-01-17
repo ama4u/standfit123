@@ -631,9 +631,10 @@ export class PostgreSQLStorage implements IStorage {
     if (orderData.userId && (!payload.customerName || !payload.customerEmail || !payload.customerPhone)) {
       const [user] = await db.select().from(users).where(eq(users.id, orderData.userId));
       if (user) {
-        payload.customerName = payload.customerName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || null;
-        payload.customerEmail = payload.customerEmail || user.email || null;
-        payload.customerPhone = payload.customerPhone || user.phoneNumber || null;
+        payload.customerName = payload.customerName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown Customer';
+        payload.customerEmail = payload.customerEmail || user.email || 'unknown@example.com';
+        // Ensure a non-null phone value to satisfy NOT NULL constraint in orders table
+        payload.customerPhone = payload.customerPhone || user.phoneNumber || '0000000000';
       }
     }
 
