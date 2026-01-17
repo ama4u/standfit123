@@ -767,6 +767,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/health', async (_req, res) => {
+    try {
+      // quick DB check (avoid heavy queries)
+      let dbOk = true;
+      try {
+        // try a very small query depending on storage implementation
+        const cats = await storage.getCategories();
+        dbOk = Array.isArray(cats);
+      } catch (e) {
+        dbOk = false;
+      }
+
+      res.json({ status: 'ok', db: dbOk, env: process.env.NODE_ENV || 'unknown' });
+    } catch (err: any) {
+      res.status(500).json({ status: 'error', message: err.message || String(err) });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
