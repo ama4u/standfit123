@@ -52,14 +52,14 @@ export default function Products() {
         keywords="products, wholesale, Nigerian food, rice, noodles, beverages"
       />
 
-      {/* Header */}
-      <section className="py-16 bg-gradient-to-br from-primary/10 to-secondary/10" data-testid="products-header">
+      {/* Header - restyled to match screenshot */}
+      <section className="py-32 bg-gray-50" data-testid="products-header">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6" data-testid="products-title">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-foreground leading-tight mb-6" data-testid="products-title">
               Our Products
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto" data-testid="products-subtitle">
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto" data-testid="products-subtitle">
               Browse our extensive collection of quality Nigerian food commodities available for wholesale and retail
             </p>
           </div>

@@ -71,23 +71,38 @@ export default function Home() {
         keywords="wholesale food, Nigerian food commodities, rice, noodles, beverages, detergents, Abuja"
       />
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 to-secondary/10 py-10 sm:py-16 lg:py-20" data-testid="hero-section">
+      {/* Hero Section - restyled to match products header */}
+      <section className="relative bg-gray-50 py-32" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-start">
-            <div className="space-y-6 sm:space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
-                  Leading Wholesale Distributor & 
-                  <span className="text-primary"> Food Retail Store</span> 
-                  in Abuja
-                </h1>
-                <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-lg" data-testid="hero-description">
-                  Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
-                </p>
-              </div>
-              
-              <Card className="p-4 sm:p-6">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-foreground leading-tight mb-6" data-testid="hero-title">
+              Leading Wholesale Distributor & <span className="text-primary">Food Retail Store</span> in Abuja
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8" data-testid="hero-description">
+              Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/products">
+                <Button size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-shop-now">
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Shop Now
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button size="lg" className="w-full sm:w-auto whitespace-nowrap bg-green-600 hover:bg-green-700 text-white border-2 border-green-500" data-testid="button-contact-us">
+                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  Contact Us
+                </Button>
+              </Link>
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-order-wholesale">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                Order Wholesale
+              </Button>
+            </div>
+
+            <div className="mt-10">
+              <Card className="inline-block p-4 sm:p-6">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <div className="text-2xl sm:text-3xl font-bold text-primary" data-testid="stat-sales">77+</div>
@@ -99,29 +114,6 @@ export default function Home() {
                   </div>
                 </div>
               </Card>
-              
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Link href="/products">
-                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-shop-now">
-                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                    Shop Now
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button size="lg" className="w-full sm:w-auto whitespace-nowrap bg-green-600 hover:bg-green-700 text-white border-2 border-green-500" data-testid="button-contact-us">
-                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                    Contact Us
-                  </Button>
-                </Link>
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto whitespace-nowrap" data-testid="button-order-wholesale">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  Order Wholesale
-                </Button>
-              </div>
-            </div>
-            
-            <div className="relative lg:mt-0">
-              <HeroCarousel />
             </div>
           </div>
         </div>
