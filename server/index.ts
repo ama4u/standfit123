@@ -4,6 +4,7 @@ import session from "express-session";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fs from 'fs';
 
 const app = express();
 
@@ -125,6 +126,32 @@ app.use((req, res, next) => {
     "/attached_assets",
     express.static(path.resolve(process.cwd(), "attached_assets"))
   );
+
+  // Serve favicon explicitly to avoid 503 when missing
+  app.get('/favicon.ico', (req, res) => {
+    try {
+      const attachedFav = path.resolve(process.cwd(), 'attached_assets', 'favicon.ico');
+      const distFav = path.resolve(process.cwd(), 'dist', 'public', 'favicon.ico');
+      const logoFallback = path.resolve(process.cwd(), 'dist', 'public', 'assets', 'standfit logo_1756828194925-CfQ7TYBl.jpg');
+
+      if (fs.existsSync(attachedFav)) {
+        return res.sendFile(attachedFav);
+      }
+      if (fs.existsSync(distFav)) {
+        return res.sendFile(distFav);
+      }
+      if (fs.existsSync(logoFallback)) {
+        // serve logo as fallback (browsers accept png/jpg as favicon)
+        return res.sendFile(logoFallback);
+      }
+
+      // No favicon available — return 204 No Content so browser stops requesting
+      return res.status(204).end();
+    } catch (err) {
+      // On error, send no content
+      return res.status(204).end();
+    }
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
