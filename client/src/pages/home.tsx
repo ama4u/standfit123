@@ -76,7 +76,7 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white" data-testid="hero-section">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-800 text-white" data-testid="hero-section">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -84,8 +84,8 @@ export default function Home() {
           <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
         </div>
         
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[600px] lg:min-h-[700px]">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center min-h-[500px] lg:min-h-[600px]">
             {/* Hero Content */}
             <div className="text-center lg:text-left space-y-6 lg:space-y-8 order-2 lg:order-1 animate-fade-in-up">
               <div className="space-y-4 lg:space-y-6">
@@ -100,13 +100,13 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4 animate-fade-in-up animate-delay-200">
                 <Link href="/products">
-                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold" data-testid="button-shop-now">
+                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-xl hover:shadow-2xl magnetic-button px-8 py-4 text-lg font-semibold" data-testid="button-shop-now">
                     <ShoppingCart className="h-5 w-5 mr-3" />
                     Shop Now
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold" data-testid="button-contact-us">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm shadow-xl hover:shadow-2xl magnetic-button px-8 py-4 text-lg font-semibold" data-testid="button-contact-us">
                     <Phone className="h-5 w-5 mr-3" />
                     Contact Us
                   </Button>
@@ -145,7 +145,7 @@ export default function Home() {
       </section>
 
       {/* Latest News Flash */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <section className="py-10 sm:py-12 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">Latest News Flash</h2>
@@ -251,7 +251,7 @@ export default function Home() {
       </section>
 
       {/* Quick Shop Categories */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-white via-gray-50 to-slate-100" data-testid="categories-section">
+      <section className="py-8 sm:py-10 bg-gradient-to-br from-white via-gray-50 to-slate-50" data-testid="categories-section">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-800 via-slate-700 to-gray-900 bg-clip-text text-transparent mb-4">Shop by Category</h2>
@@ -298,9 +298,9 @@ export default function Home() {
       <WeeklyDeals />
 
       {/* Featured Products Preview */}
-      <section className="py-16 bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50" data-testid="featured-products-section">
+      <section className="py-10 bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50" data-testid="featured-products-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-800 to-slate-800 bg-clip-text text-transparent">Featured Products</h2>
               <p className="text-muted-foreground">A selection of our popular products. Click more to view the full catalog.</p>
@@ -318,7 +318,7 @@ export default function Home() {
           {productsLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
+                <Card key={i} className="overflow-hidden animate-pulse">
                   <Skeleton className="w-full h-48" />
                   <CardContent className="p-4 space-y-4">
                     <Skeleton className="h-4 w-3/4" />
@@ -331,8 +331,93 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products?.slice(0, 8).map((product: any) => (
-                <ProductCard key={product.id} product={product} />
+              {products?.slice(0, 8).map((product: any, index: number) => (
+                <div 
+                  key={product.id} 
+                  className="group animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 bg-white/90 backdrop-blur-sm border-0 shadow-lg group-hover:shadow-blue-200/50">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={product.imageUrl || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250"}
+                        alt={product.name}
+                        className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                          <Heart className="w-4 h-4 text-red-500" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                        <span className="bg-primary/90 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                          {product.unit}
+                        </span>
+                      </div>
+                    </div>
+                    <CardContent className="p-4 relative">
+                      <div className="absolute -top-6 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="flex items-center">
+                              <Star className="w-3 h-3 text-yellow-500 mr-1" />
+                              4.8
+                            </span>
+                            <span className="flex items-center">
+                              <Shield className="w-3 h-3 text-green-500 mr-1" />
+                              Quality
+                            </span>
+                            <span className="flex items-center">
+                              <Truck className="w-3 h-3 text-blue-500 mr-1" />
+                              Fast
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors duration-300">
+                        {product.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                        {product.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="space-y-1">
+                          <div className="text-2xl font-bold text-primary">
+                            ₦{product.price?.toLocaleString()}
+                          </div>
+                          {product.wholesalePrice && (
+                            <div className="text-sm text-green-600 font-medium">
+                              Wholesale: ₦{product.wholesalePrice.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">Min Order</div>
+                          <div className="text-sm font-medium">{product.minOrderQuantity || 1}</div>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group-hover:animate-pulse"
+                        size="sm"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                      
+                      {/* Floating particles effect */}
+                      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
+                        <div className="absolute top-4 left-4 w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '0s' }}></div>
+                        <div className="absolute top-8 right-6 w-1 h-1 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute bottom-8 left-6 w-1 h-1 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
+                        <div className="absolute bottom-4 right-4 w-1 h-1 bg-pink-400 rounded-full animate-ping" style={{ animationDelay: '1.5s' }}></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
             </div>
           )}
@@ -340,43 +425,43 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 via-blue-50 to-indigo-100" data-testid="why-choose-us-section">
+      <section className="py-12 bg-gradient-to-br from-primary/5 via-blue-50 to-indigo-50" data-testid="why-choose-us-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary via-blue-700 to-indigo-700 bg-clip-text text-transparent mb-6">Why Choose Standfit Premium?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">Discover what makes us the preferred choice for food wholesale and retail in Abuja</p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary via-blue-700 to-indigo-700 bg-clip-text text-transparent mb-4">Why Choose Standfit Premium?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Discover what makes us the preferred choice for food wholesale and retail in Abuja</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center group">
-              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-primary/10 to-blue-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <Sprout className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center group animate-bounce-in" style={{ animationDelay: '0.1s' }}>
+              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-primary/10 to-blue-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-500 animate-float group-hover:animate-glow">
+                <Sprout className="h-8 w-8 text-primary group-hover:scale-125 transition-transform duration-500" />
               </Card>
-              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-primary transition-colors" data-testid="feature-fresh-products">Fresh Products</h4>
+              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300" data-testid="feature-fresh-products">Fresh Products</h4>
               <p className="text-muted-foreground text-sm">Wholesale from large pool of Nigerian food products with guaranteed freshness</p>
             </div>
             
-            <div className="text-center group">
-              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <Users className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform duration-300" />
+            <div className="text-center group animate-bounce-in" style={{ animationDelay: '0.2s' }}>
+              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-500 animate-float group-hover:animate-glow" style={{ animationDelay: '0.5s' }}>
+                <Users className="h-8 w-8 text-purple-600 group-hover:scale-125 transition-transform duration-500" />
               </Card>
-              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-purple-600 transition-colors" data-testid="feature-trusted-partners">Trusted Partners</h4>
+              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-purple-600 transition-colors duration-300" data-testid="feature-trusted-partners">Trusted Partners</h4>
               <p className="text-muted-foreground text-sm">Trusted by major Nigerian manufacturers and thousands of customers</p>
             </div>
             
-            <div className="text-center group">
-              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <Store className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform duration-300" />
+            <div className="text-center group animate-bounce-in" style={{ animationDelay: '0.3s' }}>
+              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-500 animate-float group-hover:animate-glow" style={{ animationDelay: '1s' }}>
+                <Store className="h-8 w-8 text-green-600 group-hover:scale-125 transition-transform duration-500" />
               </Card>
-              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-green-600 transition-colors" data-testid="feature-extensive-network">Extensive Network</h4>
+              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-green-600 transition-colors duration-300" data-testid="feature-extensive-network">Extensive Network</h4>
               <p className="text-muted-foreground text-sm">Extensive retail & distribution network across Abuja FCT</p>
             </div>
             
-            <div className="text-center group">
-              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <Package className="h-8 w-8 text-orange-600 group-hover:scale-110 transition-transform duration-300" />
+            <div className="text-center group animate-bounce-in" style={{ animationDelay: '0.4s' }}>
+              <Card className="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100 border-0 shadow-lg group-hover:shadow-xl transition-all duration-500 animate-float group-hover:animate-glow" style={{ animationDelay: '1.5s' }}>
+                <Package className="h-8 w-8 text-orange-600 group-hover:scale-125 transition-transform duration-500" />
               </Card>
-              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-orange-600 transition-colors" data-testid="feature-quality-assured">Quality Assured</h4>
+              <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-orange-600 transition-colors duration-300" data-testid="feature-quality-assured">Quality Assured</h4>
               <p className="text-muted-foreground text-sm">SON/NAFDAC compliance with rigorous quality checks</p>
             </div>
           </div>
@@ -384,7 +469,7 @@ export default function Home() {
       </section>
 
       {/* Social Impact */}
-      <section className="py-20 bg-gradient-to-br from-white via-slate-50 to-gray-100" data-testid="social-impact-section">
+      <section className="py-12 bg-gradient-to-br from-white via-slate-50 to-gray-50" data-testid="social-impact-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
@@ -434,7 +519,7 @@ export default function Home() {
       </section>
 
       {/* Blog/News Preview */}
-      <section className="py-20 bg-gradient-to-br from-slate-100 via-gray-50 to-blue-50" data-testid="blog-preview-section">
+      <section className="py-12 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50" data-testid="blog-preview-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-800 via-gray-700 to-blue-800 bg-clip-text text-transparent mb-6">Latest News & Updates</h2>
