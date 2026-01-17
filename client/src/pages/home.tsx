@@ -7,6 +7,7 @@ import HeroCarousel from "@/components/hero-carousel";
 import SocialImpactCarousel from "@/components/social-impact-carousel";
 import { Link } from "wouter";
 import ProductCard from "@/components/product-card";
+import Seo from "@/components/seo";
 import { 
   Store, 
   ShoppingCart, 
@@ -62,6 +63,14 @@ export default function Home() {
 
   return (
     <div>
+      <Seo
+        title="Standfit Premium — Leading Wholesale Distributor & Food Retail Store in Abuja"
+        description="Quality Nigerian food commodities at wholesale and retail prices. Trusted by thousands of customers across FCT. Browse rice, noodles, beverages, detergents and more."
+        url={typeof window !== 'undefined' ? window.location.href : 'https://standfit-e816d09b795a.herokuapp.com/'}
+        image="/assets/standfit logo_1756828194925-CfQ7TYBl.jpg"
+        keywords="wholesale food, Nigerian food commodities, rice, noodles, beverages, detergents, Abuja"
+      />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/10 to-secondary/10 py-10 sm:py-16 lg:py-20" data-testid="hero-section">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

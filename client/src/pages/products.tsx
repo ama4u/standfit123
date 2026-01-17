@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductCard from "@/components/product-card";
 import { Search, Filter } from "lucide-react";
+import Seo from "@/components/seo";
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,6 +44,14 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Products — Standfit Premium"
+        description="Browse our extensive collection of quality Nigerian food commodities available for wholesale and retail. Search and filter by category."
+        url={typeof window !== 'undefined' ? window.location.href : 'https://standfit-e816d09b795a.herokuapp.com/products'}
+        image="/assets/standfit logo_1756828194925-CfQ7TYBl.jpg"
+        keywords="products, wholesale, Nigerian food, rice, noodles, beverages"
+      />
+
       {/* Header */}
       <section className="py-16 bg-gradient-to-br from-primary/10 to-secondary/10" data-testid="products-header">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
