@@ -63,8 +63,14 @@ if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
     
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
+      ssl: { rejectUnauthorized: false },
+      max: 20, // Increase pool size for sessions
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
     });
+    
+    // Test the connection before using it
+    await pool.query('SELECT NOW()');
     
     sessionConfig.store = new pgSession({
       pool: pool,
@@ -75,7 +81,7 @@ if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
     console.log('🗄️  Using PostgreSQL session store');
   } catch (error) {
     console.error('⚠️  Failed to setup PostgreSQL session store:', error.message);
-    console.log('📝 Falling back to memory store');
+    console.log('📝 Falling back to memory store - sessions will not persist across restarts');
   }
 } else {
   console.log('💾 Using memory session store (development)');

@@ -1,0 +1,52 @@
+import postgres from 'postgres';
+
+async function testProducts() {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    console.error('DATABASE_URL not found');
+    process.exit(1);
+  }
+
+  console.log('🐘 Connecting to PostgreSQL...');
+  
+  const sql = postgres(databaseUrl, {
+    ssl: { rejectUnauthorized: false },
+    max: 1,
+  });
+
+  try {
+    console.log('📋 Testing products query...');
+    
+    const products = await sql`SELECT * FROM products LIMIT 5`;
+    console.log(`Found ${products.length} products`);
+    
+    if (products.length > 0) {
+      console.log('First product:', {
+        id: products[0].id,
+        name: products[0].name,
+        price: products[0].price,
+        category_id: products[0].category_id
+      });
+    }
+
+    console.log('\n📋 Testing categories query...');
+    const categories = await sql`SELECT * FROM categories LIMIT 5`;
+    console.log(`Found ${categories.length} categories`);
+    
+    if (categories.length > 0) {
+      console.log('First category:', {
+        id: categories[0].id,
+        name: categories[0].name
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ Query failed:', error.message);
+    console.error('Error details:', error);
+  } finally {
+    await sql.end();
+  }
+}
+
+testProducts();
