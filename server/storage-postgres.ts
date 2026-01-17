@@ -625,7 +625,19 @@ export class PostgreSQLStorage implements IStorage {
   }
 
   async createOrder(orderData: InsertOrder, items: InsertOrderItem[]): Promise<Order> {
-    const [order] = await db.insert(orders).values(orderData).returning();
+    // If this order is associated with a registered user, and customer fields are missing,
+    // fill them from the user's profile to satisfy NOT NULL constraints on the orders table.
+    let payload: any = { ...orderData };
+    if (orderData.userId && (!payload.customerName || !payload.customerEmail || !payload.customerPhone)) {
+      const [user] = await db.select().from(users).where(eq(users.id, orderData.userId));
+      if (user) {
+        payload.customerName = payload.customerName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || null;
+        payload.customerEmail = payload.customerEmail || user.email || null;
+        payload.customerPhone = payload.customerPhone || user.phoneNumber || null;
+      }
+    }
+
+    const [order] = await db.insert(orders).values(payload).returning();
     
     const orderItemsData = items.map(item => ({
       ...item,
