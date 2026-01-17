@@ -217,6 +217,7 @@ export class PostgreSQLStorage implements IStorage {
       .select({
         id: products.id,
         name: products.name,
+        slug: products.slug,
         description: products.description,
         price: products.price,
         wholesalePrice: products.wholesalePrice,
@@ -242,6 +243,7 @@ export class PostgreSQLStorage implements IStorage {
     return result.map(row => ({
       id: row.id,
       name: row.name,
+      slug: (row as any).slug,
       description: row.description,
       price: row.price,
       wholesalePrice: row.wholesalePrice,
@@ -272,6 +274,7 @@ export class PostgreSQLStorage implements IStorage {
       .select({
         id: products.id,
         name: products.name,
+        slug: products.slug,
         description: products.description,
         price: products.price,
         wholesalePrice: products.wholesalePrice,
@@ -298,6 +301,7 @@ export class PostgreSQLStorage implements IStorage {
     return result.map(row => ({
       id: row.id,
       name: row.name,
+      slug: (row as any).slug,
       description: row.description,
       price: row.price,
       wholesalePrice: row.wholesalePrice,
@@ -328,6 +332,7 @@ export class PostgreSQLStorage implements IStorage {
       .select({
         id: products.id,
         name: products.name,
+        slug: products.slug,
         description: products.description,
         price: products.price,
         wholesalePrice: products.wholesalePrice,
@@ -354,6 +359,7 @@ export class PostgreSQLStorage implements IStorage {
     return result.map(row => ({
       id: row.id,
       name: row.name,
+      slug: (row as any).slug,
       description: row.description,
       price: row.price,
       wholesalePrice: row.wholesalePrice,
@@ -384,6 +390,7 @@ export class PostgreSQLStorage implements IStorage {
       .select({
         id: products.id,
         name: products.name,
+        slug: products.slug,
         description: products.description,
         price: products.price,
         wholesalePrice: products.wholesalePrice,
@@ -412,6 +419,7 @@ export class PostgreSQLStorage implements IStorage {
     return {
       id: row.id,
       name: row.name,
+      slug: (row as any).slug,
       description: row.description,
       price: row.price,
       wholesalePrice: row.wholesalePrice,

@@ -468,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Password must be at least 6 characters long" });
       }
 
-      // Find user by valid token
+      // Find user with valid token
       const user = await storage.getUserByResetToken(token);
       if (!user) {
         return res.status(400).json({ message: "Invalid or expired reset token" });
@@ -632,75 +632,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Create product
   app.post("/api/admin/products", requireAdmin, async (req, res) => {
     try {
-      const product = await storage.createProduct(req.body);
+      const data = req.body || {};
+      // Auto-generate slug from name if not provided
+      if (!data.slug && data.name) data.slug = slugify(data.name);
+      const product = await storage.createProduct(data);
       res.json(product);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
-    }
-  });
-
-  // Public: get news flash items
-  app.get("/api/newsflash", async (_req, res) => {
-    const items = await storage.getNewsFlashItems();
-    res.json(items);
-  });
-
-  // Admin: create news flash item
-  app.post("/api/admin/newsflash", requireAdmin, async (req, res) => {
-    try {
-      const { title, url, mediaType, content, message, publicId } = req.body;
-      
-      if (mediaType === 'text') {
-        // Text-only news flash - accept both 'content' and 'message' for backward compatibility
-        const textContent = content || message;
-        if (!textContent) return res.status(400).json({ message: "content required for text posts" });
-        const item = await storage.createNewsFlashItem({ 
-          title: title || "News Update", 
-          url: null, 
-          mediaType: 'text',
-          content: textContent,
-          publicId: null
-        });
-        res.json(item);
-      } else {
-        // Media news flash
-        if (!url || !mediaType) return res.status(400).json({ message: "url and mediaType required for media posts" });
-        const item = await storage.createNewsFlashItem({ 
-          title: title || null, 
-          url, 
-          mediaType,
-          content: null,
-          publicId: publicId || null
-        });
-        res.json(item);
-      }
-    } catch (error: any) {
-      console.error("Error creating news flash item:", error);
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  // Admin: delete news flash item
-  app.delete("/api/admin/newsflash/:id", requireAdmin, async (req, res) => {
-    try {
-      const id = req.params.id;
-      
-      // Get the item first to get the publicId for Cloudinary deletion
-      const items = await storage.getNewsFlashItems();
-      const item = items.find((i: any) => i.id === id);
-      
-      if (item && item.publicId) {
-        // Delete from Cloudinary
-        const resourceType = item.mediaType === 'video' ? 'video' : 'image';
-        await deleteFromCloudinary(item.publicId, resourceType);
-      }
-      
-      // Delete from database
-      await storage.deleteNewsFlashItem(id);
-      res.json({ message: "Deleted from both Cloudinary and database" });
-    } catch (error: any) {
-      console.error("Delete error:", error);
-      res.status(500).json({ message: error.message });
     }
   });
 
@@ -708,7 +646,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
     try {
       const id = req.params.id;
-      const product = await storage.updateProduct(id, req.body);
+      const data = req.body || {};
+      if (!data.slug && data.name) data.slug = slugify(data.name);
+      const product = await storage.updateProduct(id, data);
       if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
     } catch (error: any) {
@@ -734,172 +674,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User: Get profile
-  app.get("/api/user/profile", requireAuth, async (req, res) => {
-    res.json(req.user);
-  });
+  // Sitemap index and gzipped sitemaps
+  const zlib = require('zlib');
 
-  // User: Update profile
-  app.put("/api/user/profile", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session.userId!;
-      const { firstName, lastName, phoneNumber, contactAddress } = req.body;
-      const user = await storage.updateUser(userId, { firstName, lastName, phoneNumber, contactAddress });
-      if (!user) return res.status(404).json({ message: "User not found" });
-      res.json(user);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
-    }
-  });
-
-  // User: Get orders
-  app.get("/api/user/orders", requireAuth, async (req, res) => {
-    const userId = req.session.userId!;
-    const orders = await storage.getOrdersByUser(userId);
-    res.json(orders);
-  });
-
-  // User: Get single order
-  app.get("/api/user/orders/:id", requireAuth, async (req, res) => {
-    const id = req.params.id;
-    const userId = req.session.userId!;
-    const order = await storage.getOrder(id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-    if (order.userId !== userId) return res.status(403).json({ message: "Unauthorized" });
-    res.json(order);
-  });
-
-  // Guest: Create order (no authentication required)
-  app.post("/api/guest/orders", async (req, res) => {
-    try {
-      const { items, customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, notes, fulfillmentMethod } = req.body as {
-        items: { productId: string; quantity: number }[];
-        customerName: string;
-        customerEmail: string;
-        customerPhone: string;
-        shippingAddress: string;
-        paymentMethod?: string;
-        notes?: string;
-        fulfillmentMethod?: string;
-      };
-
-      if (!Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ message: "Order items are required" });
-      }
-
-      if (!customerName || !customerEmail || !customerPhone) {
-        return res.status(400).json({ message: "Customer name, email, and phone are required" });
-      }
-
-      const resolvedItems = [] as { productId: string; quantity: number; priceAtOrder: number }[];
-      let totalAmount = 0;
-      
-      for (const item of items) {
-        const product = await storage.getProduct(item.productId);
-        if (!product) return res.status(400).json({ message: `Product ${item.productId} not found` });
-        const price = Number(product.price);
-        const subtotal = price * item.quantity;
-        totalAmount += subtotal;
-        resolvedItems.push({ 
-          productId: item.productId, 
-          quantity: item.quantity, 
-          priceAtOrder: price 
-        });
-      }
-
-      const order = await storage.createOrder(
-        {
-          userId: null, // Guest order
-          customerName,
-          customerEmail,
-          customerPhone,
-          totalAmount,
-          status: "pending",
-          shippingAddress: shippingAddress || "",
-          paymentMethod: paymentMethod || "cash_on_delivery",
-          notes: notes || null,
-        },
-        resolvedItems
-      );
-
-      res.json(order);
-    } catch (error: any) {
-      console.error('Guest order creation error:', error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // User: Create order
-  app.post("/api/user/orders", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session.userId!;
-      const { items, shippingAddress, paymentMethod, notes } = req.body as {
-        items: { productId: string; quantity: number }[];
-        shippingAddress: string;
-        paymentMethod?: string;
-        notes?: string;
-      };
-
-      if (!Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ message: "Order items are required" });
-      }
-
-      const resolvedItems = [] as { productId: string; quantity: number; priceAtPurchase: number; subtotal: number }[];
-      let totalAmount = 0;
-      for (const item of items) {
-        const product = await storage.getProduct(item.productId);
-        if (!product) return res.status(400).json({ message: `Product ${item.productId} not found` });
-        const price = Number(product.price);
-        const subtotal = price * item.quantity;
-        totalAmount += subtotal;
-        resolvedItems.push({ productId: item.productId, quantity: item.quantity, priceAtPurchase: price, subtotal });
-      }
-
-      const order = await storage.createOrder(
-        {
-          userId,
-          totalAmount,
-          status: "pending",
-          shippingAddress: shippingAddress || "",
-          paymentMethod: paymentMethod || null,
-          notes: notes || null,
-        },
-        resolvedItems
-      );
-
-      await storage.createNotification({ userId, title: "Order Placed", message: `Your order #${order.id} has been placed successfully`, type: "order_update" });
-      res.json(order);
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // User: Get notifications
-  app.get("/api/user/notifications", requireAuth, async (req, res) => {
-    const userId = req.session.userId!;
-    const notifications = await storage.getNotifications(userId);
-    res.json(notifications);
-  });
-
-  // User: Mark notification as read
-  app.patch("/api/user/notifications/:id/read", requireAuth, async (req, res) => {
-    try {
-      const id = req.params.id;
-      await storage.markNotificationAsRead(id);
-      res.json({ message: "Notification marked as read" });
-    } catch (error: any) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Sitemap (runtime) - includes main pages, products and blog posts
   app.get('/sitemap.xml', async (req, res) => {
     try {
       const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+      // sitemap index referencing two sitemaps
+      const now = new Date().toISOString();
+      const indexXml = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap>\n    <loc>${baseUrl}/sitemap-main.xml.gz</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>\n  <sitemap>\n    <loc>${baseUrl}/sitemap-products.xml.gz</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>\n</sitemapindex>`;
+      res.header('Content-Type', 'application/xml');
+      res.send(indexXml);
+    } catch (err) {
+      console.error('Sitemap index error:', err);
+      res.status(500).send('Failed to generate sitemap index');
+    }
+  });
 
-      const products = (await storage.getProducts()) || [];
-      const posts = (await storage.getPublishedBlogPosts()) || [];
-
+  app.get('/sitemap-main.xml.gz', async (req, res) => {
+    try {
+      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
       const pages = [
         { url: '/', priority: '1.0', changefreq: 'daily' },
         { url: '/products', priority: '0.9', changefreq: 'daily' },
@@ -907,45 +701,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { url: '/blog', priority: '0.8', changefreq: 'daily' },
         { url: '/news-flash', priority: '0.7', changefreq: 'weekly' },
       ];
-
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
       for (const p of pages) {
         xml += `  <url>\n    <loc>${baseUrl}${p.url}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
       }
+      xml += '</urlset>';
+      const gz = zlib.gzipSync(xml);
+      res.header('Content-Type', 'application/xml');
+      res.header('Content-Encoding', 'gzip');
+      res.send(gz);
+    } catch (error) {
+      console.error('sitemap-main generation error:', error);
+      res.status(500).send('Failed to generate sitemap');
+    }
+  });
 
+  app.get('/sitemap-products.xml.gz', async (req, res) => {
+    try {
+      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+      const products = (await storage.getProducts()) || [];
+      const posts = (await storage.getPublishedBlogPosts()) || [];
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
       for (const prod of products) {
         const lastmod = prod.updatedAt || prod.createdAt ? new Date(prod.updatedAt || prod.createdAt).toISOString() : new Date().toISOString();
-        xml += `  <url>\n    <loc>${baseUrl}/products/${prod.id}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+        // prefer slug if available
+        const slugOrId = prod.slug || prod.id;
+        xml += `  <url>\n    <loc>${baseUrl}/products/${slugOrId}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
       }
-
       for (const post of posts) {
         const lastmod = post.updatedAt || post.publishedAt || post.createdAt ? new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString() : new Date().toISOString();
         const slug = post.slug || (post.id || '');
         xml += `  <url>\n    <loc>${baseUrl}/blog/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
       }
-
       xml += '</urlset>';
-
+      const gz = zlib.gzipSync(xml);
       res.header('Content-Type', 'application/xml');
-      res.send(xml);
+      res.header('Content-Encoding', 'gzip');
+      res.send(gz);
     } catch (error) {
-      console.error('Sitemap generation error:', error);
+      console.error('sitemap-products generation error:', error);
       res.status(500).send('Failed to generate sitemap');
     }
   });
 
-  // robots.txt
-  app.get('/robots.txt', (req, res) => {
-    const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
-    const lines = [
-      'User-agent: *',
-      'Allow: /',
-      `Sitemap: ${baseUrl}/sitemap.xml`,
-    ];
-    res.type('text/plain');
-    res.send(lines.join('\n'));
+  // Admin: submit sitemap to search engines (ping) - protected
+  app.post('/api/admin/sitemap/submit', requireAdmin, async (req, res) => {
+    try {
+      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+      const sitemapUrl = `${baseUrl}/sitemap.xml`;
+      const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+      const bingPing = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+
+      const fetch = require('node-fetch');
+      const results = await Promise.allSettled([
+        fetch(googlePing),
+        fetch(bingPing),
+      ]);
+
+      res.json({ message: 'Pinged search engines', results: results.map(r => ({ status: r.status })) });
+    } catch (error) {
+      console.error('Sitemap submit error:', error);
+      res.status(500).json({ message: 'Failed to submit sitemap' });
+    }
   });
 
   const httpServer = createServer(app);
