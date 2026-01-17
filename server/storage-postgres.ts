@@ -13,6 +13,7 @@ import {
   contactMessages,
   orders,
   orderItems,
+  notifications,
   type AdminUser,
   type InsertAdminUser,
   type User,
@@ -35,6 +36,8 @@ import {
   type InsertOrder,
   type OrderItem,
   type InsertOrderItem,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema-postgres";
 
 export interface IStorage {
@@ -90,6 +93,12 @@ export interface IStorage {
   // Contact operations
   getContactMessages(): Promise<ContactMessage[]>;
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
+  
+  // Notification operations
+  getNotifications(userId: string): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: string): Promise<void>;
+  deleteNotification(id: string): Promise<void>;
   
   // Order operations
   getOrders(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
@@ -610,6 +619,34 @@ export class PostgreSQLStorage implements IStorage {
   async createContactMessage(message: InsertContactMessage): Promise<ContactMessage> {
     const [newMessage] = await db.insert(contactMessages).values(message).returning();
     return newMessage;
+  }
+
+  // Notification operations
+  async getNotifications(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notificationData: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(notificationData)
+      .returning();
+    return notification;
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
   }
 
   // Order operations

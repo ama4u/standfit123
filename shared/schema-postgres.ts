@@ -137,6 +137,17 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").default("info"),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Orders table
 export const orders = pgTable("orders", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -205,6 +216,11 @@ export const insertContactMessageSchema = createInsertSchema(contactMessages).om
   createdAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
   createdAt: true,
@@ -246,6 +262,8 @@ export type NewsFlashItem = typeof newsFlashItems.$inferSelect;
 export type InsertNewsFlashItem = z.infer<typeof insertNewsFlashSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
