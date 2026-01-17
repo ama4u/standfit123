@@ -8,13 +8,22 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Initialize database persistence system
-console.log('🛡️  Initializing database persistence...');
-try {
-  const { ensureDatabasePersistence } = await import("../auto-backup-restore.js");
-  await ensureDatabasePersistence();
-} catch (error) {
-  console.error('⚠️  Database persistence system failed to initialize:', error.message);
+// Initialize database persistence system (only when explicitly enabled via env var)
+console.log('🛡️  Checking whether to initialize database persistence...');
+if (process.env.ENABLE_DATABASE_PERSISTENCE === 'true') {
+  try {
+    const { ensureDatabasePersistence } = await import("../auto-backup-restore.js");
+    if (typeof ensureDatabasePersistence === 'function') {
+      console.log('🛡️  Initializing database persistence...');
+      await ensureDatabasePersistence();
+    } else {
+      console.log('🛡️  ensureDatabasePersistence not exported from auto-backup-restore.js; skipping');
+    }
+  } catch (error: any) {
+    console.error('⚠️  Database persistence system failed to initialize:', error?.message || error);
+  }
+} else {
+  console.log('🛡️  Database persistence initialization skipped (ENABLE_DATABASE_PERSISTENCE not set)');
 }
 
 // Trust proxy for Heroku
