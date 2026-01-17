@@ -318,13 +318,14 @@ export default function AdminProducts() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
-          <p className="text-gray-600">Manage your product catalog and inventory</p>
+          <p className="text-gray-600">Manage your product catalog, inventory, and categories</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => setShowAddCategory(true)}
+            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
           >
             <Tag className="w-4 h-4 mr-2" />
             Add Category
@@ -829,47 +830,99 @@ export default function AdminProducts() {
       </Dialog>
 
       {/* Categories Management */}
-      {categories && categories.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <Tag className="w-5 h-5" />
-              Categories ({categories.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+              Categories Management ({categories?.length || 0})
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowAddCategory(true)}
+              className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Category
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {categories && categories.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categories.map((category: any) => (
-                <div key={category.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                <div key={category.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{category.name}</h4>
+                      <h4 className="font-medium text-gray-900 mb-1">{category.name}</h4>
                       {category.description && (
-                        <p className="text-sm text-gray-500 mt-1">{category.description}</p>
+                        <p className="text-sm text-gray-500 mb-2">{category.description}</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-2">
-                        {products?.filter((p: any) => p.categoryId === category.id).length || 0} products
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {products?.filter((p: any) => p.categoryId === category.id).length || 0} products
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          ID: {category.id.slice(0, 8)}...
+                        </Badge>
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm(`Are you sure you want to delete "${category.name}"?`)) {
-                          deleteCategoryMutation.mutate(category.id);
-                        }
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // TODO: Add edit category functionality
+                          toast({ title: "Info", description: "Edit category feature coming soon!" });
+                        }}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const productCount = products?.filter((p: any) => p.categoryId === category.id).length || 0;
+                          const message = productCount > 0 
+                            ? `Are you sure you want to delete "${category.name}"? This will affect ${productCount} product(s) which will become uncategorized.`
+                            : `Are you sure you want to delete "${category.name}"?`;
+                          
+                          if (confirm(message)) {
+                            deleteCategoryMutation.mutate(category.id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={deleteCategoryMutation.isPending}
+                      >
+                        {deleteCategoryMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-center py-8">
+              <Tag className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No categories yet</h3>
+              <p className="text-gray-500 mb-4">Create your first category to organize your products</p>
+              <Button 
+                onClick={() => setShowAddCategory(true)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add First Category
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
