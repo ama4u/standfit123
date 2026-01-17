@@ -72,6 +72,7 @@ async function seedDatabase() {
       const sugarCategory = cats.find((c: any) => c.slug === "sugar-sweeteners");
       const tomatoCategory = cats.find((c: any) => c.slug === "tomato-pastes");
 
+      // Build product list and ensure missing items are created (idempotent)
       const productData = [
         // Noodles
         { name: "Indomitable Noodles", description: "Indomitable pack", price: 9300, unit: "per pack", categoryId: noodlesCategory?.id, inStock: true },
@@ -176,14 +177,27 @@ async function seedDatabase() {
         { name: "Protect 160g", description: "Protect 160g", price: 8350, unit: "160g", categoryId: detergentsCategory?.id, inStock: true },
       ];
 
+      // Get currently existing products and create only missing ones
+      const existingProducts = await storage.getProducts();
+      let createdCount = 0;
       for (const prod of productData) {
         try {
-          await storage.createProduct(prod);
+          const exists = existingProducts.find((p: any) => (p.name || '').toLowerCase() === (prod.name || '').toLowerCase());
+          if (!exists) {
+            await storage.createProduct(prod);
+            createdCount++;
+            console.log(`Created product: ${prod.name}`);
+          }
         } catch (err) {
           console.error("Failed to create product", prod.name, err);
         }
       }
-      console.log("✓ Sample products created");
+
+      if (createdCount > 0) {
+        console.log(`✓ ${createdCount} sample products created`);
+      } else {
+        console.log("✓ Sample products already exist or were previously created");
+      }
     }
 
     // Create sample orders
