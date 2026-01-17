@@ -892,6 +892,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sitemap (runtime) - includes main pages, products and blog posts
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+
+      const products = (await storage.getProducts()) || [];
+      const posts = (await storage.getPublishedBlogPosts()) || [];
+
+      const pages = [
+        { url: '/', priority: '1.0', changefreq: 'daily' },
+        { url: '/products', priority: '0.9', changefreq: 'daily' },
+        { url: '/contact', priority: '0.7', changefreq: 'weekly' },
+        { url: '/blog', priority: '0.8', changefreq: 'daily' },
+        { url: '/news-flash', priority: '0.7', changefreq: 'weekly' },
+      ];
+
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+      for (const p of pages) {
+        xml += `  <url>\n    <loc>${baseUrl}${p.url}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
+      }
+
+      for (const prod of products) {
+        const lastmod = prod.updatedAt || prod.createdAt ? new Date(prod.updatedAt || prod.createdAt).toISOString() : new Date().toISOString();
+        xml += `  <url>\n    <loc>${baseUrl}/products/${prod.id}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      }
+
+      for (const post of posts) {
+        const lastmod = post.updatedAt || post.publishedAt || post.createdAt ? new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString() : new Date().toISOString();
+        const slug = post.slug || (post.id || '');
+        xml += `  <url>\n    <loc>${baseUrl}/blog/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      }
+
+      xml += '</urlset>';
+
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (error) {
+      console.error('Sitemap generation error:', error);
+      res.status(500).send('Failed to generate sitemap');
+    }
+  });
+
+  // robots.txt
+  app.get('/robots.txt', (req, res) => {
+    const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+    const lines = [
+      'User-agent: *',
+      'Allow: /',
+      `Sitemap: ${baseUrl}/sitemap.xml`,
+    ];
+    res.type('text/plain');
+    res.send(lines.join('\n'));
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
